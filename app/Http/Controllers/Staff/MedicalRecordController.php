@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Http\Controllers\Staff;
+
+use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\MedicalRecord;
+use App\Models\Patient;
+use Illuminate\Http\Request;
+
+class MedicalRecordController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = MedicalRecord::with(['patient', 'user'])
+            ->where('user_id', auth()->id());
+
+        if ($request->filled('search')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->search . '%')
+                  ->orWhere('no_rm', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_periksa', $request->tanggal);
+        }
+
+        $records = $query->orderByDesc('tanggal_periksa')
+                         ->orderByDesc('created_at')
+                         ->paginate(15);
+
+        return view('staff.medical.index', compact('records'));
+    }
+
+    public function create(Request $request)
+    {
+        // Bisa dipanggil dengan ?patient_id=X dari halaman detail pasien
+        $patient = $request->filled('patient_id')
+            ? Patient::findOrFail($request->patient_id)
+            : null;
+
+        return view('staff.medical.create', compact('patient'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'patient_id'    => 'required|exists:patients,id',
+            'tanggal_periksa' => 'required|date',
+            'gula_darah'    => 'nullable|numeric|min:0|max:9999',
+            'kolesterol'    => 'nullable|numeric|min:0|max:9999',
+            'asam_urat'     => 'nullable|numeric|min:0|max:99',
+            'tensi_sistolik'  => 'nullable|integer|min:0|max:999',
+            'tensi_diastolik' => 'nullable|integer|min:0|max:999',
+            'suhu'          => 'nullable|numeric|min:30|max:45',
+            'nadi'          => 'nullable|integer|min:0|max:300',
+            'respirasi'     => 'nullable|integer|min:0|max:100',
+            'catatan'       => 'nullable|string|max:500',
+        ], [
+            'patient_id.required' => 'Pasien wajib dipilih.',
+            'tanggal_periksa.required' => 'Tanggal periksa wajib diisi.',
+        ]);
+
+        $record = MedicalRecord::create([
+            'patient_id'      => $request->patient_id,
+            'user_id'         => auth()->id(),
+            'gula_darah'      => $request->gula_darah,
+            'kolesterol'      => $request->kolesterol,
+            'asam_urat'       => $request->asam_urat,
+            'tensi_sistolik'  => $request->tensi_sistolik,
+            'tensi_diastolik' => $request->tensi_diastolik,
+            'suhu'            => $request->suhu,
+            'nadi'            => $request->nadi,
+            'respirasi'       => $request->respirasi,
+            'catatan'         => $request->catatan,
+            'tanggal_periksa' => $request->tanggal_periksa,
+        ]);
+
+        ActivityLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'create_medical_record',
+            'description' => 'Input rekam medis pasien: ' . $record->patient->nama,
+            'ip_address'  => $request->ip(),
+        ]);
+
+        return redirect()->route('staff.patients.show', $record->patient_id)
+            ->with('success', 'Hasil pemeriksaan berhasil disimpan!');
+    }
+
+    public function show(MedicalRecord $medicalRecord)
+    {
+        // Staf hanya lihat rekam medis yang dia input
+        if ($medicalRecord->user_id !== auth()->id()) {
+            abort(403);
+        }
+        $medicalRecord->load(['patient', 'user']);
+        return view('staff.medical.show', compact('medicalRecord'));
+    }
+
+    public function destroy(MedicalRecord $medicalRecord)
+    {
+        abort(403, 'Rekam medis tidak dapat dihapus.');
+    }
+}
