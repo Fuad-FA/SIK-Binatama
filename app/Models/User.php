@@ -50,7 +50,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class);
     }
-
+// Relasi ke rekam medis yang diinput user ini
+public function medicalRecords()
+{
+    return $this->hasMany(MedicalRecord::class);
+}
     // Relasi: satu user bisa punya banyak activity log
     public function activityLogs()
     {

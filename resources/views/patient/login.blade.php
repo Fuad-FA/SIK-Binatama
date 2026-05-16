@@ -9,7 +9,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2E7D32">
     <style>
-        :root {
+        /* :root {
             --hijau    : #2E7D32;
             --biru-tua : #1565C0;
             --kuning   : #FDD835;
@@ -95,7 +95,129 @@
             font-size: 12px;
             color: #2e7d32;
             margin-bottom: 16px;
-        }
+        } */
+:root {
+    --hijau    : #2E7D32;
+    --biru-tua : #1565C0;
+    --kuning   : #FDD835;
+    --orange   : #F57C00;
+}
+
+body {
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 50%, #1E88E5 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.portal-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 16px;
+}
+
+.portal-header {
+    background: #E3F2FD;
+    border-radius: 16px 16px 0 0;
+    padding: 24px 28px 16px;
+    text-align: center;
+}
+
+.portal-header .icon-box {
+    width: 60px;
+    height: 60px;
+    background: #1565C0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+}
+
+.portal-header h4 {
+    color: #1565C0;
+    font-weight: 800;
+    font-size: 17px;
+    margin-bottom: 2px;
+}
+
+.portal-header p {
+    color: #555;
+    font-size: 12px;
+    margin: 0;
+}
+
+.portal-body {
+    background: #fff;
+    border-radius: 0 0 16px 16px;
+    padding: 24px 28px 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1.5px solid #ddd;
+    padding: 10px 14px;
+    font-size: 15px;
+}
+
+.form-control:focus {
+    border-color: #1565C0;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.15);
+}
+
+.input-group-text {
+    border-radius: 8px 0 0 8px;
+    background: #f8f9fa;
+    border: 1.5px solid #ddd;
+    border-right: none;
+    color: #1565C0;
+}
+
+.input-group .form-control {
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: #1565C0;
+}
+
+.btn-portal {
+    background: linear-gradient(135deg, #1E88E5, #1565C0);
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    width: 100%;
+}
+
+.btn-portal:hover {
+    opacity: 0.9;
+    color: #fff;
+}
+
+.portal-footer {
+    text-align: center;
+    margin-top: 16px;
+    color: rgba(255,255,255,0.8);
+    font-size: 12px;
+}
+
+.hint-box {
+    background: #e3f2fd;
+    border: 1px dashed #90caf9;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #1565C0;
+    margin-bottom: 16px;
+}
+
     </style>
 </head>
 <body>

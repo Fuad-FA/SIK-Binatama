@@ -11,17 +11,18 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    // Tampilkan halaman login
-    public function showForm()
+    // ============================================================
+    // ADMIN LOGIN
+    // ============================================================
+    public function showAdminForm()
     {
-        if (Auth::check()) {
-            return $this->redirectByRole(Auth::user()->role);
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
         }
-        return view('auth.login');
+        return view('auth.login-admin');
     }
 
-    // Proses login username + password (Admin & Guru)
-    public function login(Request $request)
+    public function loginAdmin(Request $request)
     {
         $request->validate([
             'username' => 'required|string',
@@ -31,10 +32,10 @@ class LoginController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        // Cari user berdasarkan username atau email
-        $user = User::where('username', $request->username)
-                    ->orWhere('email', $request->username)
-                    ->first();
+        $user = User::where(function($q) use ($request) {
+            $q->where('username', $request->username)
+              ->orWhere('email', $request->username);
+        })->where('role', 'admin')->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return back()->withInput($request->only('username'))
@@ -42,28 +43,82 @@ class LoginController extends Controller
         }
 
         if (!$user->is_active) {
-            return back()->withInput($request->only('username'))
-                ->with('error', 'Akun Anda dinonaktifkan. Hubungi administrator.');
+            return back()->with('error', 'Akun Anda dinonaktifkan.');
         }
 
         Auth::login($user, $request->boolean('remember'));
-
-        // Update last login
         $user->update(['last_login' => now()]);
 
-        // Catat activity log
         ActivityLog::create([
             'user_id'     => $user->id,
-            'action'      => 'login',
-            'description' => 'Login berhasil dari IP ' . $request->ip(),
+            'action'      => 'login_admin',
+            'description' => 'Admin login dari IP ' . $request->ip(),
             'ip_address'  => $request->ip(),
         ]);
 
-        return $this->redirectByRole($user->role);
+        return redirect()->route('admin.dashboard');
     }
 
-    // Proses login QR Code (Siswa)
-    public function loginQR(Request $request)
+    // ============================================================
+    // GURU LOGIN
+    // ============================================================
+    public function showGuruForm()
+    {
+        if (Auth::check() && Auth::user()->role === 'guru') {
+            return redirect()->route('staff.dashboard');
+        }
+        return view('auth.login-guru');
+    }
+
+    public function loginGuru(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ], [
+            'username.required' => 'Username wajib diisi.',
+            'password.required' => 'Password wajib diisi.',
+        ]);
+
+        $user = User::where(function($q) use ($request) {
+            $q->where('username', $request->username)
+              ->orWhere('email', $request->username);
+        })->where('role', 'guru')->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return back()->withInput($request->only('username'))
+                ->with('error', 'Username atau password salah.');
+        }
+
+        if (!$user->is_active) {
+            return back()->with('error', 'Akun Anda dinonaktifkan. Hubungi administrator.');
+        }
+
+        Auth::login($user, $request->boolean('remember'));
+        $user->update(['last_login' => now()]);
+
+        ActivityLog::create([
+            'user_id'     => $user->id,
+            'action'      => 'login_guru',
+            'description' => 'Guru login dari IP ' . $request->ip(),
+            'ip_address'  => $request->ip(),
+        ]);
+
+        return redirect()->route('staff.dashboard');
+    }
+
+    // ============================================================
+    // SISWA LOGIN
+    // ============================================================
+    public function showSiswaForm()
+    {
+        if (Auth::check() && Auth::user()->role === 'siswa') {
+            return redirect()->route('staff.dashboard');
+        }
+        return view('auth.login-siswa');
+    }
+
+    public function loginSiswa(Request $request)
     {
         $request->validate([
             'barcode'  => 'required|string',
@@ -90,15 +145,17 @@ class LoginController extends Controller
 
         ActivityLog::create([
             'user_id'     => $user->id,
-            'action'      => 'login_qr',
-            'description' => 'Login via QR Code dari IP ' . $request->ip(),
+            'action'      => 'login_siswa',
+            'description' => 'Siswa login via QR dari IP ' . $request->ip(),
             'ip_address'  => $request->ip(),
         ]);
 
-        return $this->redirectByRole($user->role);
+        return redirect()->route('staff.dashboard');
     }
 
-    // Logout
+    // ============================================================
+    // LOGOUT
+    // ============================================================
     public function logout(Request $request)
     {
         $user = Auth::user();
@@ -116,42 +173,64 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')
-            ->with('success', 'Anda berhasil logout.');
+        // Redirect ke halaman login sesuai role terakhir
+        $role = $user?->role ?? 'admin';
+        return match($role) {
+            'admin'  => redirect()->route('login.admin')->with('success', 'Anda berhasil logout.'),
+            'guru'   => redirect()->route('login.guru')->with('success', 'Anda berhasil logout.'),
+            'siswa'  => redirect()->route('login.siswa')->with('success', 'Anda berhasil logout.'),
+            default  => redirect()->route('login.admin'),
+        };
     }
 
-    // Halaman ganti password (wajib untuk siswa pertama login)
+    // ============================================================
+    // GANTI PASSWORD (Siswa wajib ganti saat pertama login)
+    // ============================================================
     public function showChangePassword()
     {
         return view('auth.change-password');
     }
 
-    // Proses ganti password
+    // public function updatePassword(Request $request)
+    // {
+    //     $request->validate([
+    //         'password' => 'required|string|min:6|confirmed',
+    //     ], [
+    //         'password.required'  => 'Password baru wajib diisi.',
+    //         'password.min'       => 'Password minimal 6 karakter.',
+    //         'password.confirmed' => 'Konfirmasi password tidak cocok.',
+    //     ]);
+
+    //     Auth::user()->update([
+    //         'password'             => Hash::make($request->password),
+    //         'must_change_password' => false,
+    //     ]);
+
+    //     return redirect()->route('staff.dashboard')
+    //         ->with('success', 'Password berhasil diubah!');
+    // }
     public function updatePassword(Request $request)
-    {
-        $request->validate([
-            'password' => 'required|string|min:6|confirmed',
-        ], [
-            'password.required'  => 'Password baru wajib diisi.',
-            'password.min'       => 'Password minimal 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-        ]);
+{
+    $request->validate([
+        'password' => 'required|string|min:6|confirmed',
+    ], [
+        'password.required'  => 'Password baru wajib diisi.',
+        'password.min'       => 'Password minimal 6 karakter.',
+        'password.confirmed' => 'Konfirmasi password tidak cocok.',
+    ]);
 
-        Auth::user()->update([
-            'password'             => Hash::make($request->password),
-            'must_change_password' => false,
-        ]);
+    $user = Auth::user();
 
-        return redirect()->route('staff.dashboard')
-            ->with('success', 'Password berhasil diubah!');
-    }
+    $user->update([
+        'password'             => Hash::make($request->password),
+        'must_change_password' => false,
+    ]);
 
-    // Arahkan user ke dashboard sesuai role
-    private function redirectByRole(string $role)
-    {
-        return match($role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            default => redirect()->route('staff.dashboard'),
-        };
-    }
+    // Refresh session
+    $request->session()->regenerate();
+
+    return redirect()
+        ->route('staff.dashboard')
+        ->with('success', 'Password berhasil diubah!');
+}
 }

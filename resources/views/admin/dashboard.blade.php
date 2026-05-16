@@ -104,10 +104,18 @@
                         <div class="fw-semibold" style="font-size:13px;">{{ Str::limit($staf->name, 18) }}</div>
                         <div style="font-size:11px;color:#888;">{{ ucfirst($staf->role) }}</div>
                     </div>
-                    <div class="text-end">
+                    {{-- <div class="text-end">
                         <div style="font-size:12px;font-weight:700;color:var(--orange);">{{ $staf->trx_count }} trx</div>
                         <div style="font-size:10px;color:#aaa;">{{ $staf->pasien_count }} pasien</div>
-                    </div>
+                    </div> --}}
+                    <div class="text-end">
+    <div style="font-size:12px;font-weight:700;color:var(--orange);">
+        {{ $staf->trx_count }} trx
+    </div>
+    <div style="font-size:10px;color:#aaa;">
+        {{ $staf->rekam_count }} rekam · {{ $staf->pasien_count }} pasien
+    </div>
+</div>
                 </div>
                 @empty
                 <div class="text-center py-4 text-muted" style="font-size:13px;">

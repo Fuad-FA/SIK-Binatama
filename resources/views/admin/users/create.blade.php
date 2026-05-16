@@ -1,71 +1,41 @@
 @extends('layouts.app')
-
 @section('title', 'Tambah Staf')
 @section('page-title', 'Tambah Staf Baru')
 
 @section('content')
 <div class="row justify-content-center">
 <div class="col-lg-7">
-
 <div class="card border-0 shadow-sm" style="border-radius:12px;">
     <div class="card-header fw-bold text-white py-3"
          style="background:var(--biru-tua);border-radius:12px 12px 0 0;">
-        <i class="bi bi-person-plus-fill me-2"></i> Form Tambah Staf
+        <i class="bi bi-person-plus-fill me-2"></i>Form Tambah Staf
     </div>
     <div class="card-body p-4">
-        <form action="{{ route('admin.users.store') }}" method="POST">
+        <form action="{{ route('admin.users.store') }}" method="POST" id="form-staf">
             @csrf
 
-            {{-- Nama Lengkap --}}
+            {{-- 1. Nama Lengkap --}}
             <div class="mb-3">
                 <label class="form-label fw-semibold">
                     Nama Lengkap <span class="text-danger">*</span>
                 </label>
                 <input type="text" name="name"
                        class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name') }}" placeholder="Nama lengkap staf">
+                       value="{{ old('name') }}"
+                       placeholder="Nama lengkap staf">
                 @error('name')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            {{-- Username --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Username <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                    <span class="input-group-text">@</span>
-                    <input type="text" name="username"
-                           class="form-control @error('username') is-invalid @enderror"
-                           value="{{ old('username') }}"
-                           placeholder="username_unik" autocomplete="off">
-                </div>
-                @error('username')
-                    <div class="text-danger mt-1" style="font-size:12px;">{{ $message }}</div>
-                @enderror
-                <div class="form-text">Hanya huruf, angka, tanda hubung (-) dan underscore (_).</div>
-            </div>
-
-            {{-- Email --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Email</label>
-                <input type="email" name="email"
-                       class="form-control @error('email') is-invalid @enderror"
-                       value="{{ old('email') }}" placeholder="email@sekolah.sch.id (opsional)">
-                @error('email')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            {{-- Role --}}
+            {{-- 2. Role --}}
             <div class="mb-3">
                 <label class="form-label fw-semibold">
                     Role <span class="text-danger">*</span>
                 </label>
                 <select name="role" id="role-select"
                         class="form-select @error('role') is-invalid @enderror"
-                        onchange="toggleBarcodeField(this.value)">
+                        onchange="updateForm(this.value)">
                     <option value="">-- Pilih Role --</option>
                     <option value="guru"  {{ old('role') === 'guru'  ? 'selected' : '' }}>Guru</option>
                     <option value="siswa" {{ old('role') === 'siswa' ? 'selected' : '' }}>Siswa</option>
@@ -75,20 +45,31 @@
                 @enderror
             </div>
 
-            {{-- Jabatan --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Jabatan / Kelas</label>
-                <input type="text" name="jabatan"
-                       class="form-control"
-                       value="{{ old('jabatan') }}"
-                       placeholder="Contoh: Guru Farmasi / Kelas XI Keperawatan A">
+            {{-- 3a. Username (hanya Guru) --}}
+            <div class="mb-3" id="field-username"
+                 style="{{ old('role') === 'guru' ? '' : 'display:none;' }}">
+                <label class="form-label fw-semibold">
+                    Username <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">@</span>
+                    <input type="text" name="username"
+                           class="form-control @error('username') is-invalid @enderror"
+                           value="{{ old('username') }}"
+                           placeholder="username_guru"
+                           autocomplete="off">
+                </div>
+                @error('username')
+                    <div class="text-danger mt-1" style="font-size:12px;">{{ $message }}</div>
+                @enderror
+                <div class="form-text">Hanya huruf, angka, tanda hubung (-) dan underscore (_).</div>
             </div>
 
-            {{-- Barcode (khusus siswa) --}}
-            <div class="mb-3" id="barcode-field"
+            {{-- 3b. Barcode QR (hanya Siswa) --}}
+            <div class="mb-3" id="field-barcode"
                  style="{{ old('role') === 'siswa' ? '' : 'display:none;' }}">
                 <label class="form-label fw-semibold">
-                    Barcode QR <span class="text-danger">*</span>
+                    Barcode / QR Code <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
                     <span class="input-group-text">
@@ -97,26 +78,36 @@
                     <input type="text" name="barcode"
                            class="form-control @error('barcode') is-invalid @enderror"
                            value="{{ old('barcode') }}"
-                           placeholder="Kode unik dari kartu siswa">
+                           placeholder="Kode dari kartu siswa">
                 </div>
                 @error('barcode')
                     <div class="text-danger mt-1" style="font-size:12px;">{{ $message }}</div>
                 @enderror
-                <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Password default siswa: <code>siswa</code> (wajib ganti saat login pertama)
-                </div>
             </div>
 
-            {{-- Password --}}
-            <div class="mb-4">
+            {{-- 4. Jabatan / Kelas --}}
+            <div class="mb-3" id="field-jabatan"
+                 style="{{ old('role') ? '' : 'display:none;' }}">
+                <label class="form-label fw-semibold" id="label-jabatan">
+                    Jabatan / Kelas
+                </label>
+                <input type="text" name="jabatan"
+                       class="form-control"
+                       value="{{ old('jabatan') }}"
+                       id="input-jabatan"
+                       placeholder="Contoh: Guru Farmasi / Kelas XI Keperawatan A">
+            </div>
+
+            {{-- 5. Password --}}
+            <div class="mb-4" id="field-password"
+                 style="{{ old('role') ? '' : 'display:none;' }}">
                 <label class="form-label fw-semibold">
                     Password <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
                     <input type="password" name="password" id="password-input"
                            class="form-control @error('password') is-invalid @enderror"
-                           placeholder="Minimal 6 karakter">
+                           placeholder="Minimal 5 karakter">
                     <button type="button" class="btn btn-outline-secondary"
                             onclick="togglePassword('password-input', this)">
                         <i class="bi bi-eye"></i>
@@ -125,38 +116,82 @@
                 @error('password')
                     <div class="text-danger mt-1" style="font-size:12px;">{{ $message }}</div>
                 @enderror
+                <div id="password-hint" class="form-text" style="display:none;">
+                    Password default siswa: <code>siswa</code>
+                    (wajib ganti saat login pertama)
+                </div>
             </div>
 
             {{-- Tombol --}}
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2" id="field-buttons" style="display:none!important;">
                 <button type="submit" class="btn btn-primary px-4">
-                    <i class="bi bi-check-circle me-2"></i> Simpan
+                    <i class="bi bi-check-circle me-2"></i>Simpan
                 </button>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary px-4">
-                    <i class="bi bi-arrow-left me-2"></i> Batal
+                <a href="{{ route('admin.users.index') }}"
+                   class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-left me-2"></i>Batal
+                </a>
+            </div>
+
+            {{-- Tombol selalu tampil --}}
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-circle me-2"></i>Simpan
+                </button>
+                <a href="{{ route('admin.users.index') }}"
+                   class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-left me-2"></i>Batal
                 </a>
             </div>
         </form>
     </div>
 </div>
-
 </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-function toggleBarcodeField(role) {
-    const field = document.getElementById('barcode-field');
+// Jalankan saat load jika ada old value
+document.addEventListener('DOMContentLoaded', function() {
+    const role = document.getElementById('role-select').value;
+    if (role) updateForm(role);
+});
+
+function updateForm(role) {
+    const fieldUsername = document.getElementById('field-username');
+    const fieldBarcode  = document.getElementById('field-barcode');
+    const fieldJabatan  = document.getElementById('field-jabatan');
+    const fieldPassword = document.getElementById('field-password');
+    const labelJabatan  = document.getElementById('label-jabatan');
+    const inputJabatan  = document.getElementById('input-jabatan');
     const passwordInput = document.getElementById('password-input');
-    if (role === 'siswa') {
-        field.style.display = 'block';
-        passwordInput.placeholder = 'Default: siswa';
-        passwordInput.value = 'siswa';
-    } else {
-        field.style.display = 'none';
-        passwordInput.placeholder = 'Minimal 6 karakter';
-        passwordInput.value = '';
+    const passwordHint  = document.getElementById('password-hint');
+
+    if (role === 'guru') {
+        fieldUsername.style.display = 'block';
+        fieldBarcode.style.display  = 'none';
+        fieldJabatan.style.display  = 'block';
+        fieldPassword.style.display = 'block';
+        labelJabatan.textContent    = 'Jabatan';
+        inputJabatan.placeholder    = 'Contoh: Guru Farmasi, Guru Keperawatan';
+        passwordInput.placeholder   = 'Minimal 5 karakter';
+        passwordHint.style.display  = 'none';
+        // Kosongkan barcode
+        document.querySelector('[name=barcode]').value = '';
+    } else if (role === 'siswa') {
+        fieldUsername.style.display = 'none';
+        fieldBarcode.style.display  = 'block';
+        fieldJabatan.style.display  = 'block';
+        fieldPassword.style.display = 'block';
+        labelJabatan.textContent    = 'Kelas';
+        inputJabatan.placeholder    = 'Contoh: XI Keperawatan A, XII Farmasi B';
+        passwordInput.placeholder   = 'Default: siswa';
+        passwordInput.value         = 'siswa';
+        passwordHint.style.display  = 'block';
+        // Kosongkan username
+        document.querySelector('[name=username]') &&
+            (document.querySelector('[name=username]').value = '');
     }
 }
 
@@ -164,7 +199,9 @@ function togglePassword(inputId, btn) {
     const input = document.getElementById(inputId);
     const isText = input.type === 'text';
     input.type = isText ? 'password' : 'text';
-    btn.innerHTML = isText ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+    btn.innerHTML = isText
+        ? '<i class="bi bi-eye"></i>'
+        : '<i class="bi bi-eye-slash"></i>';
 }
 </script>
 @endpush

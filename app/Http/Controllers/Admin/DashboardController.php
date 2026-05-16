@@ -58,17 +58,28 @@ class DashboardController extends Controller
         }
 
         // Top 5 staf paling aktif bulan ini
-        $topStaf = User::where('role', '!=', 'admin')
-            ->withCount([
-                'patients as pasien_count' => fn($q) =>
-                    $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
-                'transactions as trx_count' => fn($q) =>
-                    $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
-            ])
-            ->orderByDesc('trx_count')
-            ->limit(5)
-            ->get();
-
+        // $topStaf = User::where('role', '!=', 'admin')
+        //     ->withCount([
+        //         'patients as pasien_count' => fn($q) =>
+        //             $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+        //         'transactions as trx_count' => fn($q) =>
+        //             $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+        //     ])
+        //     ->orderByDesc('trx_count')
+        //     ->limit(5)
+        //     ->get();
+$topStaf = User::where('role', '!=', 'admin')
+    ->withCount([
+        'patients as pasien_count' => fn($q) =>
+            $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+        'medicalRecords as rekam_count' => fn($q) =>
+            $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+        'transactions as trx_count' => fn($q) =>
+            $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+    ])
+    ->orderByDesc('trx_count')
+    ->limit(5)
+    ->get();
         // Pasien terbaru
         $recentPatients = Patient::with('creator')
             ->orderByDesc('created_at')->limit(5)->get();

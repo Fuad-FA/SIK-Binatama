@@ -6,6 +6,8 @@
     <title>Login — SIK Rumah Sehat Binatama</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    {{-- QR Code Scanner --}}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         :root {
             --biru-tua : #1565C0;
@@ -287,11 +289,34 @@
                                class="form-control"
                                placeholder="Scan QR atau ketik barcode">
                     </div>
-                    <div class="mt-2 qr-scanner-box" onclick="focusBarcode()">
+                    {{-- <div class="mt-2 qr-scanner-box" onclick="focusBarcode()">
                         <i class="bi bi-qr-code-scan fs-2 text-secondary mb-1"></i>
                         <p class="mb-0 text-secondary" style="font-size:12px;">
                             Klik di sini lalu scan QR Code<br>menggunakan kamera/scanner HP
                         </p>
+                    </div> --}}
+                    <div class="mt-2">
+                        {{-- Tombol buka kamera --}}
+                        <button type="button" id="btn-scan"
+                                class="btn w-100 py-2"
+                                style="background:#f8f9fa;border:2px dashed #90caf9;
+                                       border-radius:8px;color:#555;"
+                                onclick="startScan()">
+                            <i class="bi bi-qr-code-scan fs-4 d-block mb-1"
+                               style="color:var(--biru-muda);"></i>
+                            <span style="font-size:12px;">
+                                Klik untuk scan QR Code via kamera
+                            </span>
+                        </button>
+
+                        {{-- Area kamera --}}
+                        <div id="qr-reader-container" style="display:none;margin-top:8px;">
+                            <div id="qr-reader" style="border-radius:8px;overflow:hidden;"></div>
+                            <button type="button" class="btn btn-sm btn-outline-danger w-100 mt-2"
+                                    onclick="stopScan()">
+                                <i class="bi bi-x-circle me-1"></i>Tutup Kamera
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -352,9 +377,127 @@
             : '<i class="bi bi-eye-slash"></i>';
     }
 
-    function focusBarcode() {
-        document.getElementById('barcode-input').focus();
+    // function focusBarcode() {
+    //     document.getElementById('barcode-input').focus();
+    // }
+    // Load library html5-qrcode dari CDN
+// const script = document.createElement('script');
+// script.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+// document.head.appendChild(script);
+
+// let html5QrCode = null;
+
+// function startScan() {
+//     document.getElementById('btn-scan').style.display = 'none';
+//     document.getElementById('qr-reader-container').style.display = 'block';
+
+//     html5QrCode = new Html5Qrcode("qr-reader");
+
+//     html5QrCode.start(
+//         { facingMode: "environment" }, // kamera belakang
+//         {
+//             fps: 10,
+//             qrbox: { width: 220, height: 220 },
+//         },
+//         (decodedText) => {
+//             // Berhasil scan
+//             document.getElementById('barcode-input').value = decodedText;
+//             stopScan();
+
+//             // Flash success
+//             document.getElementById('barcode-input').style.borderColor = '#2E7D32';
+//             setTimeout(() => {
+//                 document.getElementById('barcode-input').style.borderColor = '';
+//             }, 2000);
+//         },
+//         (errorMessage) => {
+//             // Scan belum berhasil, abaikan
+//         }
+//     ).catch(err => {
+//         alert('Tidak bisa mengakses kamera: ' + err);
+//         stopScan();
+//     });
+// }
+
+// function stopScan() {
+//     if (html5QrCode) {
+//         html5QrCode.stop().then(() => {
+//             html5QrCode.clear();
+//             html5QrCode = null;
+//         }).catch(() => {});
+//     }
+//     document.getElementById('qr-reader-container').style.display = 'none';
+//     document.getElementById('btn-scan').style.display = 'block';
+// }
+let html5QrCode = null;
+let isScanning  = false;
+
+function startScan() {
+    if (isScanning) return;
+
+    document.getElementById('btn-scan').style.display = 'none';
+    document.getElementById('qr-reader-container').style.display = 'block';
+
+    html5QrCode = new Html5Qrcode("qr-reader");
+    isScanning  = true;
+
+    Html5Qrcode.getCameras().then(cameras => {
+        if (!cameras || cameras.length === 0) {
+            alert('Tidak ada kamera ditemukan.');
+            stopScan();
+            return;
+        }
+
+        // Pilih kamera belakang jika ada
+        const cameraId = cameras.length > 1 ? cameras[1].id : cameras[0].id;
+
+        html5QrCode.start(
+            cameraId,
+            {
+                fps: 15,
+                qrbox: { width: 200, height: 200 },
+                aspectRatio: 1.0,
+            },
+            (decodedText) => {
+                // Berhasil scan — masukkan ke field
+                const input = document.getElementById('barcode-input');
+                input.value = decodedText.trim().toUpperCase();
+
+                // Highlight hijau
+                input.style.borderColor = '#2E7D32';
+                input.style.background  = '#f1f8e9';
+                setTimeout(() => {
+                    input.style.borderColor = '';
+                    input.style.background  = '';
+                }, 3000);
+
+                stopScan();
+            },
+            () => {
+                // Frame belum berhasil baca, abaikan
+            }
+        ).catch(err => {
+            console.error(err);
+            alert('Gagal membuka kamera: ' + err);
+            stopScan();
+        });
+
+    }).catch(err => {
+        alert('Tidak bisa mengakses kamera: ' + err);
+        stopScan();
+    });
+}
+
+function stopScan() {
+    isScanning = false;
+    if (html5QrCode) {
+        html5QrCode.stop()
+            .then(() => { html5QrCode.clear(); html5QrCode = null; })
+            .catch(() => { html5QrCode = null; });
     }
+    document.getElementById('qr-reader-container').style.display = 'none';
+    document.getElementById('btn-scan').style.display = 'block';
+}
 </script>
 </body>
 </html>

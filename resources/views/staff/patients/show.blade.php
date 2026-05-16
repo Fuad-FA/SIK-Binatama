@@ -62,7 +62,7 @@
 </div>
 
 {{-- Tombol Aksi --}}
-<div class="d-flex gap-2 mb-4">
+{{-- <div class="d-flex gap-2 mb-4">
     <a href="{{ route('staff.medical-records.create') }}?patient_id={{ $patient->id }}"
        class="btn btn-success">
         <i class="bi bi-clipboard2-pulse-fill me-2"></i>Input Pemeriksaan Baru
@@ -75,6 +75,70 @@
        class="btn btn-outline-secondary ms-auto">
         <i class="bi bi-arrow-left me-2"></i>Kembali
     </a>
+</div> --}}
+
+{{-- Tombol Aksi --}}
+{{-- <div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{{ route('staff.medical-records.create') }}?patient_id={{ $patient->id }}"
+       class="btn btn-success">
+        <i class="bi bi-clipboard2-pulse-fill me-2"></i>Input Pemeriksaan Baru
+    </a>
+    <a href="{{ route('staff.transactions.create') }}?patient_id={{ $patient->id }}"
+       class="btn btn-warning fw-semibold">
+        <i class="bi bi-cart-plus-fill me-2"></i>Buat Transaksi
+    </a>
+    <a href="{{ route('staff.patients.edit', $patient) }}"
+       class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-2"></i>Edit Data
+    </a> --}}
+
+    {{-- Tombol Aksi --}}
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{{ route('staff.transactions.create') }}?patient_id={{ $patient->id }}"
+       class="btn btn-success fw-semibold">
+        <i class="bi bi-cart-plus-fill me-2"></i>Transaksi & Pemeriksaan
+    </a>
+    <a href="{{ route('staff.patients.edit', $patient) }}"
+       class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-2"></i>Edit Data
+    </a>
+
+    {{-- Tombol Hapus — hanya admin --}}
+    @if(auth()->user()->role === 'admin')
+    <form action="{{ route('staff.patients.destroy', $patient) }}"
+          method="POST" class="d-inline ms-auto">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-outline-danger"
+                onclick="return confirm('Hapus data pasien {{ $patient->nama }}?\n\nTindakan ini tidak bisa dibatalkan!')">
+            <i class="bi bi-trash me-2"></i>Hapus Pasien
+        </button>
+    </form>
+    @else
+    <a href="{{ route('staff.patients.index') }}"
+       class="btn btn-outline-secondary ms-auto">
+        <i class="bi bi-arrow-left me-2"></i>Kembali
+    </a>
+    @endif
+</div>
+
+    {{-- Tombol Hapus — hanya admin --}}
+    @if(auth()->user()->role === 'admin')
+    <form action="{{ route('staff.patients.destroy', $patient) }}"
+          method="POST" class="d-inline ms-auto">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-outline-danger"
+                onclick="return confirm('Hapus data pasien {{ $patient->nama }}?\n\nTindakan ini tidak bisa dibatalkan!')">
+            <i class="bi bi-trash me-2"></i>Hapus Pasien
+        </button>
+    </form>
+    @else
+    <a href="{{ route('staff.patients.index') }}"
+       class="btn btn-outline-secondary ms-auto">
+        <i class="bi bi-arrow-left me-2"></i>Kembali
+    </a>
+    @endif
 </div>
 
 {{-- Riwayat Pemeriksaan --}}

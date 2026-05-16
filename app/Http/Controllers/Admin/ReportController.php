@@ -31,18 +31,36 @@ class ReportController extends Controller
         ];
 
         // Performa staf
-        $stafPerforma = User::where('role', '!=', 'admin')
-            ->withCount([
-                'patients as pasien_count' => fn($q) =>
-                    $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
-                'transactions as trx_count' => fn($q) =>
-                    $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
-            ])
-            ->having('pasien_count', '>', 0)
-            ->orHaving('trx_count', '>', 0)
-            ->orderByDesc('trx_count')
-            ->get();
-
+        // $stafPerforma = User::where('role', '!=', 'admin')
+        //     ->withCount([
+        //         'patients as pasien_count' => fn($q) =>
+        //             $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+        //         'transactions as trx_count' => fn($q) =>
+        //             $q->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun),
+        //     ])
+        //     ->having('pasien_count', '>', 0)
+        //     ->orHaving('trx_count', '>', 0)
+        //     ->orderByDesc('trx_count')
+        //     ->get();
+$stafPerforma = User::where('role', '!=', 'admin')
+    ->withCount([
+        // Rekam medis yang diinput staf ini bulan ini
+        'medicalRecords as rekam_count' => fn($q) =>
+            $q->whereMonth('created_at', $bulan)
+              ->whereYear('created_at', $tahun),
+        // Transaksi yang dibuat staf ini bulan ini
+        'transactions as trx_count' => fn($q) =>
+            $q->whereMonth('created_at', $bulan)
+              ->whereYear('created_at', $tahun),
+        // Pasien baru yang didaftarkan staf ini bulan ini
+        'patients as pasien_count' => fn($q) =>
+            $q->whereMonth('created_at', $bulan)
+              ->whereYear('created_at', $tahun),
+    ])
+    ->get()
+    ->filter(fn($s) => $s->rekam_count > 0 || $s->trx_count > 0 || $s->pasien_count > 0)
+    ->sortByDesc('trx_count')
+    ->values();
         // Data per hari dalam bulan ini
         $harian = Transaction::where('status', 'selesai')
             ->whereMonth('created_at', $bulan)

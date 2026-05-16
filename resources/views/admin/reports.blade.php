@@ -73,7 +73,7 @@
     </div>
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead style="background:#f8f9fa;">
+            {{-- <thead style="background:#f8f9fa;">
                 <tr>
                     <th class="ps-4" style="font-size:12px;color:#888;font-weight:600;">#</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">NAMA STAF</th>
@@ -110,7 +110,79 @@
                 </tr>
                 @empty
                 <tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada aktivitas staf.</td></tr>
-                @endforelse
+                @endforelse --}}
+                <thead style="background:#f8f9fa;">
+    <tr>
+        <th class="ps-4" style="font-size:12px;color:#888;font-weight:600;">#</th>
+        <th style="font-size:12px;color:#888;font-weight:600;">NAMA STAF</th>
+        <th style="font-size:12px;color:#888;font-weight:600;">ROLE</th>
+        <th style="font-size:12px;color:#888;font-weight:600;">PASIEN BARU</th>
+        <th style="font-size:12px;color:#888;font-weight:600;">REKAM MEDIS</th>
+        <th style="font-size:12px;color:#888;font-weight:600;">TRANSAKSI</th>
+        <th style="font-size:12px;color:#888;font-weight:600;">AKTIVITAS</th>
+    </tr>
+</thead>
+<tbody>
+    @forelse($stafPerforma as $i => $staf)
+    <tr>
+        <td class="ps-4">
+            <div style="width:28px;height:28px;border-radius:50%;
+                        background:{{ ['#FDD835','#e0e0e0','#f4c47e'][$i] ?? '#e3f2fd' }};
+                        display:flex;align-items:center;justify-content:center;
+                        font-weight:800;font-size:12px;color:#555;">
+                {{ $i + 1 }}
+            </div>
+        </td>
+        <td>
+            <div class="fw-semibold" style="font-size:14px;">{{ $staf->name }}</div>
+            <div style="font-size:11px;color:#888;">{{ $staf->jabatan ?? '-' }}</div>
+        </td>
+        <td>
+            <span class="badge {{ $staf->role === 'guru' ? 'bg-success' : 'bg-primary' }}">
+                {{ ucfirst($staf->role) }}
+            </span>
+        </td>
+        <td>
+            <span class="fw-bold" style="color:var(--biru-muda);">
+                {{ $staf->pasien_count }}
+            </span>
+            <span class="text-muted" style="font-size:12px;"> pasien</span>
+        </td>
+        <td>
+            <span class="fw-bold" style="color:var(--hijau);">
+                {{ $staf->rekam_count }}
+            </span>
+            <span class="text-muted" style="font-size:12px;"> rekam</span>
+        </td>
+        <td>
+            <span class="fw-bold" style="color:var(--orange);">
+                {{ $staf->trx_count }}
+            </span>
+            <span class="text-muted" style="font-size:12px;"> transaksi</span>
+        </td>
+        <td>
+            @php
+                $total  = $staf->pasien_count + $staf->rekam_count + $staf->trx_count;
+                $maxVal = $stafPerforma->max(fn($s) => $s->pasien_count + $s->rekam_count + $s->trx_count);
+                $pct    = $maxVal > 0 ? ($total / $maxVal * 100) : 0;
+            @endphp
+            <div style="background:#f0f0f0;border-radius:4px;height:8px;width:100px;">
+                <div style="background:var(--biru-muda);border-radius:4px;
+                            height:8px;width:{{ $pct }}%;"></div>
+            </div>
+            <div style="font-size:10px;color:#aaa;margin-top:2px;">
+                {{ $total }} aktivitas
+            </div>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="7" class="text-center py-4 text-muted">
+            <i class="bi bi-person-x d-block fs-3 mb-1 opacity-25"></i>
+            Tidak ada aktivitas staf pada bulan ini.
+        </td>
+    </tr>
+    @endforelse
             </tbody>
         </table>
     </div>

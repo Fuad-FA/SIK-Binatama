@@ -6,7 +6,7 @@
 @section('content')
 
 {{-- Header & Tombol Tambah --}}
-<div class="d-flex justify-content-between align-items-center mb-4">
+{{-- <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h5 class="fw-bold mb-1">Daftar Staf</h5>
         <p class="text-muted mb-0" style="font-size:13px;">
@@ -16,6 +16,55 @@
     <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
         <i class="bi bi-person-plus-fill me-2"></i> Tambah Staf
     </a>
+</div> --}}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Daftar Staf</h5>
+        <p class="text-muted mb-0" style="font-size:13px;">
+            Total {{ $users->total() }} akun terdaftar
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        {{-- Tombol Export — ikuti filter aktif --}}
+        <div class="dropdown">
+            <button class="btn btn-outline-success dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown">
+                <i class="bi bi-download me-1"></i>Export
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item"
+                       href="{{ route('admin.users.export', array_merge(request()->query(), ['format' => 'xlsx'])) }}">
+                        <i class="bi bi-file-earmark-excel me-2 text-success"></i>
+                        Export Excel (.xlsx)
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item"
+                       href="{{ route('admin.users.export', array_merge(request()->query(), ['format' => 'csv'])) }}">
+                        <i class="bi bi-filetype-csv me-2 text-primary"></i>
+                        Export CSV (.csv)
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <span class="dropdown-item-text text-muted" style="font-size:11px;">
+                        @if(request('role'))
+                            Akan export: {{ ucfirst(request('role')) }} saja
+                        @else
+                            Akan export: Semua staf
+                        @endif
+                        @if(request('search'))
+                            · Filter: "{{ request('search') }}"
+                        @endif
+                    </span>
+                </li>
+            </ul>
+        </div>
+        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill me-2"></i>Tambah Staf
+        </a>
+    </div>
 </div>
 
 {{-- Filter & Search --}}
