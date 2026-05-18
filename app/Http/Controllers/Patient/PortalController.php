@@ -53,25 +53,65 @@ class PortalController extends Controller
     }
 
     // Dashboard pasien
-    public function dashboard()
-    {
-        $patient = Patient::with([
-            'medicalRecords' => fn($q) => $q->orderByDesc('tanggal_periksa'),
-        ])->findOrFail(Session::get('patient_id'));
+    // public function dashboard()
+    // {
+    //     $patient = Patient::with([
+    //         'medicalRecords' => fn($q) => $q->orderByDesc('tanggal_periksa'),
+    //     ])->findOrFail(Session::get('patient_id'));
 
-        $latestRecord = $patient->medicalRecords->first();
-        $totalVisit   = $patient->medicalRecords->count();
+    //     $latestRecord = $patient->medicalRecords->first();
+    //     $totalVisit   = $patient->medicalRecords->count();
 
-        return view('patient.dashboard', compact('patient', 'latestRecord', 'totalVisit'));
-    }
+    //     return view('patient.dashboard', compact('patient', 'latestRecord', 'totalVisit'));
+    // }
+// public function dashboard(Request $request)
+// {
+//     $patient = Patient::findOrFail(session('patient_id'));
 
+//     // Ambil rekam medis TERBARU (bukan pertama)
+//     $latestRecord = $patient->medicalRecords()
+//         ->orderByDesc('tanggal_periksa')
+//         ->orderByDesc('created_at')
+//         ->first();
+
+//     $totalKunjungan = $patient->medicalRecords()->count();
+
+//     return view('patient.dashboard', compact('patient', 'latestRecord', 'totalKunjungan'));
+// }
+
+public function dashboard(Request $request)
+{
+    $patient = Patient::findOrFail(session('patient_id'));
+
+    $latestRecord = $patient->medicalRecords()
+        ->orderByDesc('tanggal_periksa')
+        ->orderByDesc('created_at')
+        ->first();
+
+    $totalVisit = $patient->medicalRecords()->count();
+
+    return view('patient.dashboard', compact('patient', 'latestRecord', 'totalVisit'));
+}
     // Semua riwayat pemeriksaan
-    public function records()
-    {
-        $patient = Patient::with([
-            'medicalRecords' => fn($q) => $q->with('user')->orderByDesc('tanggal_periksa'),
-        ])->findOrFail(Session::get('patient_id'));
+    // public function records()
+    // {
+    //     $patient = Patient::with([
+    //         'medicalRecords' => fn($q) => $q->with('user')->orderByDesc('tanggal_periksa'),
+    //     ])->findOrFail(Session::get('patient_id'));
 
-        return view('patient.records', compact('patient'));
-    }
+    //     return view('patient.records', compact('patient'));
+    // }
+
+    public function records(Request $request)
+{
+    $patient = Patient::findOrFail(session('patient_id'));
+
+    $records = $patient->medicalRecords()
+        ->with('user')
+        ->orderByDesc('tanggal_periksa')
+        ->orderByDesc('created_at')
+        ->get();
+
+    return view('patient.records', compact('patient', 'records'));
+}
 }

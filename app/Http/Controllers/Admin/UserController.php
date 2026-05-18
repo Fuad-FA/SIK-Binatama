@@ -321,6 +321,21 @@ class UserController extends Controller
     return $this->exportXlsx($users, $filename, $roleLabel);
 }
 
+public function unlock(User $user)
+{
+    $user->resetLoginAttempts();
+
+    ActivityLog::create([
+        'user_id'     => auth()->id(),
+        'action'      => 'unlock_user',
+        'description' => 'Membuka kunci akun: ' . $user->name,
+        'ip_address'  => request()->ip(),
+    ]);
+
+    return back()->with('success', 'Akun ' . $user->name . ' berhasil dibuka!');
+}
+
+
 private function exportXlsx($users, string $filename, string $roleLabel)
 {
     // Buat file Excel manual dengan PhpSpreadsheet via DomPDF tidak tersedia

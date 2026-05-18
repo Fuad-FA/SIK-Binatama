@@ -10,34 +10,62 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    // protected $fillable = [
+    //     'name',
+    //     'username',
+    //     'email',
+    //     'password',
+    //     'role',
+    //     'barcode',
+    //     'jabatan',
+    //     'is_active',
+    //     'must_change_password',
+    //     'last_login',
+        
+    // ];
+
     protected $fillable = [
-        'name',
-        'username',
-        'email',
-        'password',
-        'role',
-        'barcode',
-        'jabatan',
-        'is_active',
-        'must_change_password',
-        'last_login',
-    ];
+    'name',
+    'username',
+    'email',
+    'password',
+    'role',
+    'barcode',
+    'jabatan',
+    'is_active',
+    'must_change_password',
+    'last_login',
+    'login_attempts',
+    'locked_at',
+];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'last_login'        => 'datetime',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
-            'must_change_password' => 'boolean',
-        ];
-    }
+    // protected function casts(): array
+    // {
+    //     return [
+    //         'email_verified_at' => 'datetime',
+    //         'last_login'        => 'datetime',
+    //         'password'          => 'hashed',
+    //         'is_active'         => 'boolean',
+    //         'must_change_password' => 'boolean',
+    //     ];
+    // }
+
+protected function casts(): array
+{
+    return [
+        'email_verified_at'    => 'datetime',
+        'last_login'           => 'datetime',
+        'locked_at'            => 'datetime',
+        'password'             => 'hashed',
+        'is_active'            => 'boolean',
+        'must_change_password' => 'boolean',
+    ];
+}
 
     // Relasi: satu user bisa input banyak pasien
     public function patients()
@@ -72,4 +100,34 @@ public function medicalRecords()
     {
         return in_array($this->role, ['guru', 'siswa']);
     }
+
+    // Cek apakah akun sedang dikunci
+public function isLocked(): bool
+{
+    return $this->locked_at !== null;
+}
+
+// Tambah percobaan login
+public function incrementLoginAttempts(): void
+{
+    $this->increment('login_attempts');
+
+    // refresh data terbaru dari database
+    $this->refresh();
+
+    if ($this->login_attempts >= 3) {
+        $this->update([
+            'locked_at' => now()
+        ]);
+    }
+}
+
+// Reset percobaan login setelah berhasil login
+public function resetLoginAttempts(): void
+{
+    $this->update([
+        'login_attempts' => 0,
+        'locked_at'      => null,
+    ]);
+}
 }

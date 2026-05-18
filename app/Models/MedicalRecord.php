@@ -9,20 +9,45 @@ class MedicalRecord extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'patient_id',
-        'user_id',
-        'gula_darah',
-        'kolesterol',
-        'asam_urat',
-        'tensi_sistolik',
-        'tensi_diastolik',
-        'suhu',
-        'nadi',
-        'respirasi',
-        'catatan',
-        'tanggal_periksa',
-    ];
+    // protected $fillable = [
+    //     'patient_id',
+    //     'user_id',
+    //     'gula_darah',
+    //     'kolesterol',
+    //     'asam_urat',
+    //     'tensi_sistolik',
+    //     'tensi_diastolik',
+    //     'suhu',
+    //     'nadi',
+    //     'respirasi',
+    //     'catatan',
+    //     'tanggal_periksa',
+    // ];
+
+protected $fillable = [
+    'patient_id',
+    'user_id',
+    'tanggal_periksa',
+
+    'gula_darah',
+    'kolesterol',
+    'asam_urat',
+
+    'tensi_sistolik',
+    'tensi_diastolik',
+
+    'suhu',
+    'nadi',
+    'respirasi',
+
+    'berat_badan',
+    'tinggi_badan',
+    'bmi',
+
+    'catatan_gizi',
+    'catatan',
+];
+
 
     protected function casts(): array
     {
@@ -88,4 +113,23 @@ class MedicalRecord extends Model
         if ($this->tensi_sistolik <= 139 || $this->tensi_diastolik <= 89) return 'Prehipertensi';
         return 'Hipertensi';
     }
+
+
+    public function kategoriBmi(): string
+{
+    if (!$this->bmi) return '-';
+    if ($this->bmi < 18.5) return 'Kurus';
+    if ($this->bmi < 25.0) return 'Normal';
+    if ($this->bmi < 30.0) return 'Gemuk';
+    return 'Obesitas';
+}
+
+public function warnaBmi(): string
+{
+    if (!$this->bmi) return '#888';
+    if ($this->bmi < 18.5) return '#1976D2'; // biru = kurus
+    if ($this->bmi < 25.0) return '#2E7D32'; // hijau = normal
+    if ($this->bmi < 30.0) return '#F57C00'; // orange = gemuk
+    return '#c62828';                          // merah = obesitas
+}
 }

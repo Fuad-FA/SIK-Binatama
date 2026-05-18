@@ -4,6 +4,11 @@
 
 @section('content')
 
+
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 {{-- Header Pasien --}}
 <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
     <div class="card-body p-4">
@@ -93,7 +98,19 @@
     </a> --}}
 
     {{-- Tombol Aksi --}}
-<div class="d-flex gap-2 mb-4 flex-wrap">
+{{-- <div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{{ route('staff.transactions.create') }}?patient_id={{ $patient->id }}"
+       class="btn btn-success fw-semibold">
+        <i class="bi bi-cart-plus-fill me-2"></i>Transaksi & Pemeriksaan
+    </a>
+    <a href="{{ route('staff.patients.edit', $patient) }}"
+       class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-2"></i>Edit Data
+    </a> --}}
+
+
+    {{-- Tombol Aksi --}}
+{{-- <div class="d-flex gap-2 mb-4 flex-wrap">
     <a href="{{ route('staff.transactions.create') }}?patient_id={{ $patient->id }}"
        class="btn btn-success fw-semibold">
         <i class="bi bi-cart-plus-fill me-2"></i>Transaksi & Pemeriksaan
@@ -102,8 +119,6 @@
        class="btn btn-outline-primary">
         <i class="bi bi-pencil me-2"></i>Edit Data
     </a>
-
-    {{-- Tombol Hapus — hanya admin --}}
     @if(auth()->user()->role === 'admin')
     <form action="{{ route('staff.patients.destroy', $patient) }}"
           method="POST" class="d-inline ms-auto">
@@ -121,9 +136,8 @@
     </a>
     @endif
 </div>
-
     {{-- Tombol Hapus — hanya admin --}}
-    @if(auth()->user()->role === 'admin')
+    {{-- @if(auth()->user()->role === 'admin')
     <form action="{{ route('staff.patients.destroy', $patient) }}"
           method="POST" class="d-inline ms-auto">
         @csrf
@@ -139,6 +153,69 @@
         <i class="bi bi-arrow-left me-2"></i>Kembali
     </a>
     @endif
+</div> --}}
+
+    {{-- Tombol Hapus — hanya admin --}}
+    {{-- @if(auth()->user()->role === 'admin')
+    <form action="{{ route('staff.patients.destroy', $patient) }}"
+          method="POST" class="d-inline ms-auto">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-outline-danger"
+                onclick="return confirm('Hapus data pasien {{ $patient->nama }}?\n\nTindakan ini tidak bisa dibatalkan!')">
+            <i class="bi bi-trash me-2"></i>Hapus Pasien
+        </button>
+    </form>
+    @else
+    <a href="{{ route('staff.patients.index') }}"
+       class="btn btn-outline-secondary ms-auto">
+        <i class="bi bi-arrow-left me-2"></i>Kembali
+    </a>
+    @endif
+</div> --}}
+
+{{-- Tombol Aksi --}}
+<div class="d-flex gap-2 mb-4 flex-wrap align-items-center">
+
+    <a href="{{ route('staff.transactions.create') }}?patient_id={{ $patient->id }}"
+       class="btn btn-success fw-semibold">
+        <i class="bi bi-cart-plus-fill me-2"></i>
+        Transaksi & Pemeriksaan
+    </a>
+
+    <a href="{{ route('staff.patients.edit', $patient) }}"
+       class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-2"></i>
+        Edit Data
+    </a>
+
+    {{-- Admin --}}
+    @if(auth()->user()->role === 'admin')
+
+    <form action="{{ route('staff.patients.destroy', $patient) }}"
+          method="POST"
+          class="ms-auto">
+        @csrf
+        @method('DELETE')
+
+        <button type="submit"
+                class="btn btn-outline-danger"
+                onclick="return confirm('Hapus data pasien {{ $patient->nama }}?\n\nTindakan ini tidak bisa dibatalkan!')">
+            <i class="bi bi-trash me-2"></i>
+            Hapus Pasien
+        </button>
+    </form>
+
+    @else
+
+    <a href="{{ route('staff.patients.index') }}"
+       class="btn btn-outline-secondary ms-auto">
+        <i class="bi bi-arrow-left me-2"></i>
+        Kembali
+    </a>
+
+    @endif
+
 </div>
 
 {{-- Riwayat Pemeriksaan --}}
@@ -160,7 +237,11 @@
                     <th style="font-size:12px;color:#888;font-weight:600;">GULA DARAH</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">KOLESTEROL</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">ASAM URAT</th>
+                    {{-- <th style="font-size:12px;color:#888;font-weight:600;">TENSI</th>
+                    <th style="font-size:12px;color:#888;font-weight:600;">PETUGAS</th> --}}
                     <th style="font-size:12px;color:#888;font-weight:600;">TENSI</th>
+                    <th style="font-size:12px;color:#888;font-weight:600;">BMI</th>
+                    <th style="font-size:12px;color:#888;font-weight:600;">CATATAN GIZI</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">PETUGAS</th>
                 </tr>
             </thead>
@@ -211,7 +292,7 @@
                         @endif
                     </td>
                     {{-- Tensi --}}
-                    <td>
+                    {{-- <td>
                         @if($rec->tensi_sistolik)
                             <span class="fw-semibold
                                 {{ $rec->statusTensi() === 'Normal' ? 'text-success' :
@@ -224,11 +305,56 @@
                     </td>
                     <td style="font-size:12px;color:#888;">
                         {{ $rec->user?->name ?? '-' }}
-                    </td>
+                    </td> --}}
+
+
+                    {{-- Tensi --}}
+<td>
+    @if($rec->tensi_sistolik)
+        <span class="fw-semibold
+            {{ $rec->statusTensi() === 'Normal' ? 'text-success' :
+               ($rec->statusTensi() === 'Prehipertensi' ? 'text-warning' : 'text-danger') }}">
+            {{ $rec->tensi_sistolik }}/{{ $rec->tensi_diastolik }} mmHg
+        </span>
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
+
+{{-- BMI --}}
+<td>
+    @if($rec->bmi)
+        <span style="color:{{ $rec->warnaBmi() }};font-weight:600;">
+            {{ $rec->bmi }}
+        </span>
+
+        <small class="text-muted d-block" style="font-size:10px;">
+            {{ $rec->kategoriBmi() }}
+        </small>
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
+
+{{-- Catatan Gizi --}}
+<td>
+    @if($rec->catatan_gizi)
+        <span style="font-size:12px;">
+            {{ Str::limit($rec->catatan_gizi, 50) }}
+        </span>
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
+
+<td style="font-size:12px;color:#888;">
+    {{ $rec->user?->name ?? '-' }}
+</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">
+                    {{-- <td colspan="6" class="text-center py-4 text-muted"> --}}
+                        <td colspan="8" class="text-center py-4 text-muted">
                         <i class="bi bi-clipboard2 d-block mb-1 opacity-25 fs-3"></i>
                         Belum ada riwayat pemeriksaan.
                     </td>

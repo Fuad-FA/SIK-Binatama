@@ -89,8 +89,32 @@ $topStaf = User::where('role', '!=', 'admin')
             ->where('status', 'selesai')
             ->orderByDesc('created_at')->limit(5)->get();
 
+            $akunTerkunci = User::whereNotNull('locked_at')
+    ->orderByDesc('locked_at')
+    ->get();
+
+
+// Produk dengan stok menipis (stok <= 10)
+        $stokMenipis = \App\Models\Product::where('is_active', true)
+            ->where('stok', '<=', 10)
+            ->where('stok', '>', 0)
+            ->orderBy('stok')
+            ->get();
+
+        // Produk habis (stok = 0)
+        $stokHabis = \App\Models\Product::where('is_active', true)
+            ->where('stok', 0)
+            ->get();
+
+
+            // Activity log terbaru
+        $activityLogs = \App\Models\ActivityLog::with('user')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
         return view('admin.dashboard', compact(
-            'stats', 'chartData', 'topStaf',
+            'stats', 'chartData', 'topStaf', 'akunTerkunci',  'stokMenipis', 'stokHabis', 'activityLogs',
             'recentPatients', 'recentTransactions'
         ));
     }

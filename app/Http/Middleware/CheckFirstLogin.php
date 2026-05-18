@@ -42,6 +42,40 @@ class CheckFirstLogin
 
 //     return $next($request);
 // }
+
+// 18,05,2026
+// public function handle(Request $request, Closure $next): Response
+// {
+//     // Jika belum login, lanjut
+//     if (!auth()->check()) {
+//         return $next($request);
+//     }
+
+//     $user = auth()->user();
+
+//     // Admin tidak wajib ganti password
+//     if ($user->role === 'admin') {
+//         return $next($request);
+//     }
+
+//     // Guru / siswa wajib ganti password pertama kali
+//     if ($user->must_change_password) {
+
+//         // Hindari redirect loop
+//         if (
+//             !$request->routeIs('password.change') &&
+//             !$request->routeIs('password.update')
+//         ) {
+//             return redirect()
+//                 ->route('password.change')
+//                 ->with('warning', 'Anda harus mengganti password terlebih dahulu.');
+//         }
+//     }
+
+//     return $next($request);
+// }
+
+
 public function handle(Request $request, Closure $next): Response
 {
     // Jika belum login, lanjut

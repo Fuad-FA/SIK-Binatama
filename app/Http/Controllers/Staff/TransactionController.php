@@ -438,23 +438,76 @@ public function nota(Transaction $transaction)
 //     return array_unique($fields);
 // }
 
+// private function getFieldsFromItems(array $itemNames): array
+// {
+//     $fields = [];
+
+//     // WHITELIST: hanya layanan ini yang memicu form rekam medis
+//     // Key = field, Value = nama layanan yang EKSAK (lowercase)
+//     $exactMapping = [
+//         'gula_darah' => ['cek gula darah'],
+//         'kolesterol' => ['cek kolesterol'],
+//         'asam_urat'  => ['cek asam urat'],
+//         'tensi'      => ['cek tekanan darah'],
+//         'suhu'       => ['cek suhu'],
+//         'nadi'       => ['cek nadi'],
+//         'respirasi'  => ['cek respirasi'],
+//     ];
+
+//     // Paket dengan field spesifik
+//     $paketMapping = [
+//         'paket sehat 1' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 2' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 3' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 4' => ['gula_darah', 'kolesterol', 'asam_urat',
+//                             'tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 5' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//     ];
+
+//     foreach ($itemNames as $nama) {
+//         $namaLower = strtolower(trim($nama));
+
+//         // Cek paket dulu
+//         $matchedPaket = false;
+//         foreach ($paketMapping as $paket => $paketFields) {
+//             if ($namaLower === $paket || str_contains($namaLower, $paket)) {
+//                 $fields      = array_merge($fields, $paketFields);
+//                 $matchedPaket = true;
+//                 break;
+//             }
+//         }
+//         if ($matchedPaket) continue;
+
+//         // Cek exact mapping — harus cocok persis dengan nama layanan
+//         foreach ($exactMapping as $field => $names) {
+//             foreach ($names as $n) {
+//                 if ($namaLower === $n) { // exact match
+//                     $fields[] = $field;
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+
+//     return array_unique($fields);
+// }
+
 private function getFieldsFromItems(array $itemNames): array
 {
     $fields = [];
 
-    // WHITELIST: hanya layanan ini yang memicu form rekam medis
-    // Key = field, Value = nama layanan yang EKSAK (lowercase)
-    $exactMapping = [
-        'gula_darah' => ['cek gula darah'],
-        'kolesterol' => ['cek kolesterol'],
-        'asam_urat'  => ['cek asam urat'],
-        'tensi'      => ['cek tekanan darah'],
-        'suhu'       => ['cek suhu'],
-        'nadi'       => ['cek nadi'],
-        'respirasi'  => ['cek respirasi'],
+    $mapping = [
+        'gula_darah'    => ['cek gula darah'],
+        'kolesterol'    => ['cek kolesterol'],
+        'asam_urat'     => ['cek asam urat'],
+        'tensi'         => ['cek tekanan darah'],
+        'suhu'          => ['cek suhu'],
+        'nadi'          => ['cek nadi'],
+        'respirasi'     => ['cek respirasi'],
+        'bmi'           => ['cek bmi', 'cek antropometri'],
+        'catatan_gizi'  => ['konsultasi gizi'],
     ];
 
-    // Paket dengan field spesifik
     $paketMapping = [
         'paket sehat 1' => ['tensi', 'suhu', 'nadi', 'respirasi'],
         'paket sehat 2' => ['tensi', 'suhu', 'nadi', 'respirasi'],
@@ -467,21 +520,16 @@ private function getFieldsFromItems(array $itemNames): array
     foreach ($itemNames as $nama) {
         $namaLower = strtolower(trim($nama));
 
-        // Cek paket dulu
-        $matchedPaket = false;
         foreach ($paketMapping as $paket => $paketFields) {
-            if ($namaLower === $paket || str_contains($namaLower, $paket)) {
-                $fields      = array_merge($fields, $paketFields);
-                $matchedPaket = true;
-                break;
+            if (str_contains($namaLower, $paket)) {
+                $fields = array_merge($fields, $paketFields);
+                continue 2;
             }
         }
-        if ($matchedPaket) continue;
 
-        // Cek exact mapping — harus cocok persis dengan nama layanan
-        foreach ($exactMapping as $field => $names) {
-            foreach ($names as $n) {
-                if ($namaLower === $n) { // exact match
+        foreach ($mapping as $field => $keywords) {
+            foreach ($keywords as $kw) {
+                if ($namaLower === $kw) {
                     $fields[] = $field;
                     break;
                 }

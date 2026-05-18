@@ -66,6 +66,20 @@
     </div>
 </div>
 
+
+
+{{-- Tombol Export --}}
+<div class="d-flex gap-2 mt-3">
+    <a href="{{ route('admin.reports.export', array_merge(request()->query(), ['format' => 'xlsx'])) }}"
+       class="btn btn-success">
+        <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
+    </a>
+    <a href="{{ route('admin.reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"
+       class="btn btn-danger">
+        <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+    </a>
+</div>
+
 {{-- Performa Staf --}}
 <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
     <div class="card-header fw-bold py-3" style="background:#f8f9fa;border-radius:12px 12px 0 0;">

@@ -331,6 +331,80 @@
 
             </div>
 
+            {{-- BMI --}}
+@if(in_array('bmi', $activeFields))
+<div class="col-12 mt-3">
+    <div class="p-3 rounded"
+         style="background:#e8f5e9;border:1px solid #a5d6a7;">
+        <div class="fw-semibold mb-2" style="font-size:13px;">
+            <i class="bi bi-calculator me-1" style="color:var(--hijau);"></i>
+            Cek BMI
+            <span class="badge bg-success ms-1" style="font-size:9px;">Aktif</span>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;">Berat Badan</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="berat_badan" id="berat_badan"
+                           class="form-control"
+                           value="{{ old('berat_badan') }}"
+                           placeholder="mis: 65" step="0.1" min="1"
+                           oninput="hitungBMI()">
+                    <span class="input-group-text">kg</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;">Tinggi Badan</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="tinggi_badan" id="tinggi_badan"
+                           class="form-control"
+                           value="{{ old('tinggi_badan') }}"
+                           placeholder="mis: 165" step="0.1" min="1"
+                           oninput="hitungBMI()">
+                    <span class="input-group-text">cm</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;">BMI (otomatis)</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="bmi" id="bmi-result"
+                           class="form-control"
+                           placeholder="Terisi otomatis"
+                           readonly
+                           style="background:#f0f0f0;">
+                    <span class="input-group-text">kg/m²</span>
+                </div>
+                <div id="bmi-kategori" class="mt-1" style="font-size:12px;font-weight:600;"></div>
+            </div>
+        </div>
+        <div class="mt-2" style="font-size:10px;color:#666;">
+            Kurus &lt;18.5 · Normal 18.5–24.9 · Gemuk 25–29.9 · Obesitas ≥30
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Konsultasi Gizi --}}
+@if(in_array('catatan_gizi', $activeFields))
+<div class="col-12 mt-3">
+    <div class="p-3 rounded"
+         style="background:#f3e5f5;border:1px solid #ce93d8;">
+        <label class="fw-semibold mb-2 d-block" style="font-size:13px;">
+            <i class="bi bi-chat-text-fill me-1" style="color:#8E24AA;"></i>
+            Catatan Konsultasi Gizi
+            <span class="badge ms-1"
+                  style="background:#ce93d8;color:#fff;font-size:9px;">Aktif</span>
+        </label>
+        <textarea name="catatan_gizi" class="form-control" rows="4"
+                  placeholder="Tuliskan hasil konsultasi gizi, saran diet, rekomendasi makanan, dll..."
+                  maxlength="2000">{{ old('catatan_gizi') }}</textarea>
+        <div class="text-muted mt-1" style="font-size:10px;">
+            Maks. 2000 karakter — hasil konsultasi ini akan tampil di portal pasien
+        </div>
+    </div>
+</div>
+@endif
+
             {{-- Catatan --}}
             <div class="mb-4">
                 <label class="form-label fw-semibold">Catatan Tambahan</label>
@@ -462,6 +536,38 @@ function checkTensi() {
     } else {
         el.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Hipertensi</span>';
     }
+}
+
+function hitungBMI() {
+    const berat  = parseFloat(document.getElementById('berat_badan').value);
+    const tinggi = parseFloat(document.getElementById('tinggi_badan').value);
+    const result = document.getElementById('bmi-result');
+    const label  = document.getElementById('bmi-kategori');
+
+    if (!berat || !tinggi || tinggi <= 0) {
+        result.value = '';
+        label.textContent = '';
+        return;
+    }
+
+    const tinggiM = tinggi / 100;
+    const bmi     = (berat / (tinggiM * tinggiM)).toFixed(2);
+    result.value  = bmi;
+
+    // Kategori dan warna
+    let kategori, warna;
+    if (bmi < 18.5) {
+        kategori = 'Kurus'; warna = '#1976D2';
+    } else if (bmi < 25) {
+        kategori = 'Normal ✓'; warna = '#2E7D32';
+    } else if (bmi < 30) {
+        kategori = 'Gemuk'; warna = '#F57C00';
+    } else {
+        kategori = 'Obesitas'; warna = '#c62828';
+    }
+
+    label.textContent = kategori;
+    label.style.color = warna;
 }
 </script>
 @endpush

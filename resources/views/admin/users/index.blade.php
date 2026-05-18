@@ -160,7 +160,7 @@
                     <td style="font-size:13px;">{{ $user->jabatan ?? '-' }}</td>
 
                     {{-- Status --}}
-                    <td>
+                    {{-- <td>
                         @if($user->is_active)
                             <span class="badge bg-success-subtle text-success px-2 py-1">
                                 <i class="bi bi-circle-fill me-1" style="font-size:7px;"></i>Aktif
@@ -175,7 +175,36 @@
                                 <i class="bi bi-key-fill me-1"></i>Reset
                             </span>
                         @endif
-                    </td>
+                    </td> --}}
+
+{{-- Status --}}
+<td>
+    @if($user->locked_at)
+        <span class="badge bg-danger px-2 py-1">
+            <i class="bi bi-lock-fill me-1"></i>Terkunci
+        </span>
+
+        <div style="font-size:10px;color:#888;margin-top:2px;">
+            {{ $user->login_attempts }}x gagal
+        </div>
+
+    @elseif($user->is_active)
+        <span class="badge bg-success-subtle text-success px-2 py-1">
+            <i class="bi bi-circle-fill me-1" style="font-size:7px;"></i>Aktif
+        </span>
+
+    @else
+        <span class="badge bg-danger-subtle text-danger px-2 py-1">
+            <i class="bi bi-circle-fill me-1" style="font-size:7px;"></i>Nonaktif
+        </span>
+    @endif
+
+    @if($user->must_change_password)
+        <span class="badge bg-warning-subtle text-warning px-2 py-1 ms-1">
+            <i class="bi bi-key-fill me-1"></i>Reset
+        </span>
+    @endif
+</td>
 
                     {{-- Last Login --}}
                     <td style="font-size:12px;color:#888;">
@@ -216,6 +245,21 @@
                                     <i class="bi bi-key"></i>
                                 </button>
                             </form>
+
+                            {{-- Unlock Akun --}}
+@if($user->locked_at)
+<form action="{{ route('admin.users.unlock', $user) }}"
+      method="POST" class="d-inline">
+    @csrf
+
+    <button type="submit"
+            class="btn btn-sm btn-danger"
+            title="Buka Kunci Akun"
+            onclick="return confirm('Buka kunci akun {{ $user->name }}?')">
+        <i class="bi bi-unlock-fill"></i>
+    </button>
+</form>
+@endif
                             {{-- Hapus --}}
                             <form action="{{ route('admin.users.destroy', $user) }}"
                                   method="POST" class="d-inline">

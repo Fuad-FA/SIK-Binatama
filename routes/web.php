@@ -134,6 +134,16 @@ Route::middleware(['auth', 'role:admin'])
             ->name('import');
         Route::post('/import', [\App\Http\Controllers\Admin\ImportController::class, 'import'])
             ->name('import.post');
+
+            Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])
+            ->name('reports.export');
+
+
+            Route::post('/users/{user}/unlock', [\App\Http\Controllers\Admin\UserController::class, 'unlock'])
+            ->name('users.unlock');
+
+            Route::get('/activity-log', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])
+            ->name('activity-log');
     });
 
 // ============================================================

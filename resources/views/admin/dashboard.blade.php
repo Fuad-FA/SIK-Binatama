@@ -4,6 +4,106 @@
 
 @section('content')
 
+{{-- Alert akun terkunci --}}
+@if(isset($akunTerkunci) && $akunTerkunci->count() > 0)
+<div class="card border-0 shadow-sm mb-4"
+     style="border-radius:12px;border-left:4px solid #c62828 !important;">
+    <div class="card-body p-3">
+        <div class="fw-bold mb-2" style="color:#c62828;font-size:14px;">
+            <i class="bi bi-lock-fill me-2"></i>
+            {{ $akunTerkunci->count() }} Akun Terkunci — Perlu Dibuka
+        </div>
+        <div class="row g-2">
+            @foreach($akunTerkunci as $akun)
+            <div class="col-md-6">
+                <div class="d-flex align-items-center gap-3 p-2 rounded"
+                     style="background:#fff5f5;border:1px solid #ffcdd2;">
+                    <div style="width:36px;height:36px;border-radius:50%;
+                                background:#ffcdd2;display:flex;align-items:center;
+                                justify-content:center;font-weight:700;color:#c62828;
+                                flex-shrink:0;">
+                        {{ strtoupper(substr($akun->name, 0, 1)) }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold" style="font-size:13px;">
+                            {{ $akun->name }}
+                        </div>
+                        <div style="font-size:11px;color:#888;">
+                            <span class="badge {{ $akun->role === 'guru' ? 'bg-success' : 'bg-primary' }}
+                                          me-1" style="font-size:9px;">
+                                {{ ucfirst($akun->role) }}
+                            </span>
+                            Terkunci sejak {{ $akun->locked_at->diffForHumans() }}
+                        </div>
+                    </div>
+                    <form action="{{ route('admin.users.unlock', $akun) }}"
+                          method="POST">
+                        @csrf
+                        <button type="submit"
+                                class="btn btn-sm btn-danger fw-semibold"
+                                onclick="return confirm('Buka kunci akun {{ $akun->name }}?')">
+                            <i class="bi bi-unlock-fill me-1"></i>Buka
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Alert stok menipis --}}
+@if((isset($stokHabis) && $stokHabis->count() > 0) ||
+    (isset($stokMenipis) && $stokMenipis->count() > 0))
+<div class="card border-0 shadow-sm mb-4"
+     style="border-radius:12px;border-left:4px solid var(--orange) !important;">
+    <div class="card-body p-3">
+        <div class="fw-bold mb-3" style="color:var(--orange);font-size:14px;">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Peringatan Stok Produk
+        </div>
+        <div class="row g-2">
+            @foreach($stokHabis as $prod)
+            <div class="col-md-4">
+                <div class="d-flex align-items-center gap-2 p-2 rounded"
+                     style="background:#fff5f5;border:1px solid #ffcdd2;">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold" style="font-size:12px;">{{ $prod->nama }}</div>
+                        <div style="font-size:10px;color:#c62828;font-weight:700;">STOK HABIS</div>
+                    </div>
+                    <a href="{{ route('admin.products.edit', $prod) }}"
+                       class="btn btn-sm btn-outline-danger" style="font-size:10px;">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+            </div>
+            @endforeach
+
+            @foreach($stokMenipis as $prod)
+            <div class="col-md-4">
+                <div class="d-flex align-items-center gap-2 p-2 rounded"
+                     style="background:#fff8e1;border:1px solid #ffe082;">
+                    <i class="bi bi-exclamation-circle-fill" style="color:var(--orange);"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold" style="font-size:12px;">{{ $prod->nama }}</div>
+                        <div style="font-size:10px;color:var(--orange);font-weight:700;">
+                            Sisa {{ $prod->stok }} unit
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.products.edit', $prod) }}"
+                       class="btn btn-sm btn-outline-warning" style="font-size:10px;">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Stat Cards Baris 1 --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">

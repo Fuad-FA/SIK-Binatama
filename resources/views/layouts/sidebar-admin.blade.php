@@ -34,3 +34,8 @@
    class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
     <i class="bi bi-bar-chart-fill"></i> Laporan Bulanan
 </a>
+
+<a href="{{ route('admin.activity-log') }}"
+   class="nav-link {{ request()->routeIs('admin.activity-log') ? 'active' : '' }}">
+    <i class="bi bi-clock-history"></i> Riwayat Aktivitas
+</a>

@@ -215,13 +215,21 @@
             <span class="badge badge-{{ auth()->user()->role }} px-3 py-2">
                 {{ ucfirst(auth()->user()->role) }}
             </span>
-            <form action="{{ route('logout') }}" method="POST" class="mb-0">
+            {{-- <form action="{{ route('logout') }}" method="POST" class="mb-0">
                 @csrf
                 <button type="submit" class="btn btn-sm btn-outline-danger">
                     <i class="bi bi-box-arrow-right"></i>
                     <span class="d-none d-md-inline">Logout</span>
                 </button>
-            </form>
+            </form> --}}
+            <form action="{{ route('logout') }}" method="POST" id="logout-form">
+    @csrf
+    <button type="button"
+            class="btn btn-outline-danger btn-sm"
+            onclick="konfirmasiLogout()">
+        <i class="bi bi-box-arrow-right me-1"></i>Logout
+    </button>
+</form>
         </div>
     </div>
     @endauth
@@ -261,7 +269,46 @@
         navigator.serviceWorker.register('/service-worker.js');
     }
 </script>
+{{-- Modal Konfirmasi Logout --}}
+<div class="modal fade" id="modalLogout" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-body text-center p-4">
+                <div style="width:64px;height:64px;border-radius:50%;
+                            background:#fff3e0;display:flex;align-items:center;
+                            justify-content:center;margin:0 auto 16px;">
+                    <i class="bi bi-box-arrow-right"
+                       style="font-size:28px;color:var(--orange);"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Keluar dari Sistem?</h6>
+                <p class="text-muted mb-4" style="font-size:13px;">
+                    Anda akan keluar dari akun
+                    <strong>{{ auth()->user()->name ?? '' }}</strong>.
+                    Pastikan semua data sudah tersimpan.
+                </p>
+                <div class="d-flex gap-2">
+                    <button type="button"
+                            class="btn btn-outline-secondary flex-grow-1"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x me-1"></i>Batal
+                    </button>
+                    <button type="button"
+                            class="btn btn-danger flex-grow-1 fw-semibold"
+                            onclick="document.getElementById('logout-form').submit()">
+                        <i class="bi bi-box-arrow-right me-1"></i>Ya, Keluar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script>
+function konfirmasiLogout() {
+    const modal = new bootstrap.Modal(document.getElementById('modalLogout'));
+    modal.show();
+}
+</script>
 @stack('scripts')
 </body>
 </html>

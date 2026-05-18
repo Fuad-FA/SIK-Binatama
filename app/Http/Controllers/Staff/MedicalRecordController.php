@@ -158,6 +158,8 @@ public function create(Request $request)
     //         ->with('success', 'Hasil pemeriksaan berhasil disimpan!');
     // }
 
+// 
+
 public function store(Request $request)
 {
     $request->validate([
@@ -171,15 +173,23 @@ public function store(Request $request)
         'suhu'            => 'nullable|numeric|min:30|max:45',
         'nadi'            => 'nullable|integer|min:0|max:300',
         'respirasi'       => 'nullable|integer|min:0|max:100',
+        'berat_badan'     => 'nullable|numeric|min:1|max:500',
+        'tinggi_badan'    => 'nullable|numeric|min:1|max:300',
+        'catatan_gizi'    => 'nullable|string|max:2000',
         'catatan'         => 'nullable|string|max:500',
-    ], [
-        'patient_id.required'      => 'Pasien wajib dipilih.',
-        'tanggal_periksa.required' => 'Tanggal periksa wajib diisi.',
     ]);
+
+    // Hitung BMI otomatis jika berat & tinggi diisi
+    $bmi = null;
+    if ($request->filled('berat_badan') && $request->filled('tinggi_badan')) {
+        $tinggiM = $request->tinggi_badan / 100;
+        $bmi     = round($request->berat_badan / ($tinggiM * $tinggiM), 2);
+    }
 
     $record = MedicalRecord::create([
         'patient_id'      => $request->patient_id,
         'user_id'         => auth()->id(),
+        'tanggal_periksa' => $request->tanggal_periksa,
         'gula_darah'      => $request->gula_darah,
         'kolesterol'      => $request->kolesterol,
         'asam_urat'       => $request->asam_urat,
@@ -188,34 +198,44 @@ public function store(Request $request)
         'suhu'            => $request->suhu,
         'nadi'            => $request->nadi,
         'respirasi'       => $request->respirasi,
+        'berat_badan'     => $request->berat_badan,
+        'tinggi_badan'    => $request->tinggi_badan,
+        'bmi'             => $bmi,
+        'catatan_gizi'    => $request->catatan_gizi,
         'catatan'         => $request->catatan,
-        'tanggal_periksa' => $request->tanggal_periksa,
     ]);
+
+    // if ($request->filled('transaction_id')) {
+    //     \App\Models\Transaction::where('id', $request->transaction_id)
+    //         ->update(['medical_record_id' => $record->id]);
+    //     session()->forget('pending_medical');
+    // }
+
+    // ActivityLog::create([
+    //     'user_id'     => auth()->id(),
+    //     'action'      => 'create_medical_record',
+    //     'description' => 'Input rekam medis pasien: ' . $record->patient->nama,
+    //     'ip_address'  => $request->ip(),
+    // ]);
+
+    // return redirect()->route('staff.patients.show', $record->patient_id)
+    //     ->with('success', 'Hasil pemeriksaan berhasil disimpan!');
 
     // Hubungkan rekam medis ke transaksi jika ada
     if ($request->filled('transaction_id')) {
         \App\Models\Transaction::where('id', $request->transaction_id)
             ->update(['medical_record_id' => $record->id]);
+        session()->forget('pending_medical');
+
+        // Redirect ke detail transaksi agar bisa cetak nota
+        return redirect()
+            ->route('staff.transactions.show', $request->transaction_id)
+            ->with('success', 'Hasil pemeriksaan berhasil disimpan! Silakan cetak nota.');
     }
 
-    ActivityLog::create([
-        'user_id'     => auth()->id(),
-        'action'      => 'create_medical_record',
-        'description' => 'Input rekam medis pasien: ' . $record->patient->nama,
-        'ip_address'  => $request->ip(),
-    ]);
-
+    // Jika tidak ada transaksi (input manual), redirect ke detail pasien
     return redirect()->route('staff.patients.show', $record->patient_id)
         ->with('success', 'Hasil pemeriksaan berhasil disimpan!');
-
-        // Hubungkan rekam medis ke transaksi jika ada
-    if ($request->filled('transaction_id')) {
-        \App\Models\Transaction::where('id', $request->transaction_id)
-            ->update(['medical_record_id' => $record->id]);
-
-        // Hapus session pending karena sudah selesai
-        session()->forget('pending_medical');
-    }
 }
 
     public function show(MedicalRecord $medicalRecord)
