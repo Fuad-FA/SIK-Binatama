@@ -145,7 +145,7 @@
                         </div>
                     </td> --}}
 
-<td>
+{{-- <td>
                         <div class="d-flex gap-1">
                             <a href="{{ route('staff.patients.show', $patient) }}"
                                class="btn btn-sm btn-primary">
@@ -155,9 +155,9 @@
                                class="btn btn-sm btn-success"
                                title="Transaksi & Pemeriksaan">
                                 <i class="bi bi-cart-plus-fill"></i>
-                            </a>
+                            </a> --}}
                             {{-- Hapus hanya untuk admin --}}
-                            @if(auth()->user()->role === 'admin')
+                            {{-- @if(auth()->user()->role === 'admin')
                             <form action="{{ route('staff.patients.destroy', $patient) }}"
                                   method="POST" class="d-inline">
                                 @csrf
@@ -171,7 +171,40 @@
                             </form>
                             @endif
                         </div>
-                    </td>
+                    </td> --}}
+
+                    <td>
+    <div class="d-flex gap-1">
+        <a href="{{ route('staff.patients.show', $patient) }}"
+           class="btn btn-sm btn-primary">
+            <i class="bi bi-eye me-1"></i>Detail
+        </a>
+
+        {{-- Tombol transaksi hanya untuk guru & siswa --}}
+        @if(auth()->user()->role !== 'admin')
+        <a href="{{ route('staff.transactions.create') }}?patient_id={{ $patient->id }}"
+           class="btn btn-sm btn-success"
+           title="Transaksi & Pemeriksaan">
+            <i class="bi bi-cart-plus-fill"></i>
+        </a>
+        @endif
+
+        {{-- Hapus hanya untuk admin --}}
+        @if(auth()->user()->role === 'admin')
+        <form action="{{ route('staff.patients.destroy', $patient) }}"
+              method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                    title="Hapus Pasien"
+                    onclick="return confirm('Hapus pasien {{ $patient->nama }}?')">
+                <i class="bi bi-trash"></i>
+            </button>
+        </form>
+        @endif
+    </div>
+</td>
 
 
                 </tr>

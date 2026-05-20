@@ -96,7 +96,7 @@ $topStaf = User::where('role', '!=', 'admin')
 
 // Produk dengan stok menipis (stok <= 10)
         $stokMenipis = \App\Models\Product::where('is_active', true)
-            ->where('stok', '<=', 10)
+            ->where('stok', '<=', 5)
             ->where('stok', '>', 0)
             ->orderBy('stok')
             ->get();

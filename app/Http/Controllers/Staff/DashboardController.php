@@ -90,14 +90,26 @@ class DashboardController extends Controller
         ];
 
         // Cek transaksi yang belum ada rekam medisnya milik staf ini
+        // $pendingTransactions = Transaction::where('user_id', $userId)
+        //     ->whereNull('medical_record_id')
+        //     ->where('status', 'selesai')
+        //     ->with('patient')
+        //     ->orderByDesc('created_at')
+        //     ->get()
+        //     ->filter(function ($trx) {
+        //         // Filter hanya transaksi yang punya layanan kesehatan
+        //         $itemNames = $trx->items->pluck('nama_item')->toArray();
+        //         $fields    = $this->getFieldsFromItems($itemNames);
+        //         return !empty($fields);
+        //     });
+
         $pendingTransactions = Transaction::where('user_id', $userId)
             ->whereNull('medical_record_id')
             ->where('status', 'selesai')
-            ->with('patient')
+            ->with(['patient', 'items'])
             ->orderByDesc('created_at')
             ->get()
             ->filter(function ($trx) {
-                // Filter hanya transaksi yang punya layanan kesehatan
                 $itemNames = $trx->items->pluck('nama_item')->toArray();
                 $fields    = $this->getFieldsFromItems($itemNames);
                 return !empty($fields);
@@ -210,51 +222,91 @@ class DashboardController extends Controller
 //     return array_unique($fields);
 // }
 
+// private function getFieldsFromItems(array $itemNames): array
+// {
+//     $fields = [];
+
+//     $mapping = [
+//         'gula_darah'    => ['cek gula darah'],
+//         'kolesterol'    => ['cek kolesterol'],
+//         'asam_urat'     => ['cek asam urat'],
+//         'tensi'         => ['cek tekanan darah'],
+//         'suhu'          => ['cek suhu'],
+//         'nadi'          => ['cek nadi'],
+//         'respirasi'     => ['cek respirasi'],
+//         'bmi'           => ['cek bmi', 'cek antropometri'],
+//         'catatan_gizi'  => ['konsultasi gizi'],
+//     ];
+
+//     $paketMapping = [
+//         'paket sehat 1' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 2' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 3' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 4' => ['gula_darah', 'kolesterol', 'asam_urat',
+//                             'tensi', 'suhu', 'nadi', 'respirasi'],
+//         'paket sehat 5' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+//     ];
+
+//     foreach ($itemNames as $nama) {
+//         $namaLower = strtolower(trim($nama));
+
+//         foreach ($paketMapping as $paket => $paketFields) {
+//             if (str_contains($namaLower, $paket)) {
+//                 $fields = array_merge($fields, $paketFields);
+//                 continue 2;
+//             }
+//         }
+
+//         foreach ($mapping as $field => $keywords) {
+//             foreach ($keywords as $kw) {
+//                 if ($namaLower === $kw) {
+//                     $fields[] = $field;
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+
+//     return array_unique($fields);
+// }
+
 private function getFieldsFromItems(array $itemNames): array
 {
-    $fields = [];
-
     $mapping = [
-        'gula_darah'    => ['cek gula darah'],
-        'kolesterol'    => ['cek kolesterol'],
-        'asam_urat'     => ['cek asam urat'],
-        'tensi'         => ['cek tekanan darah'],
-        'suhu'          => ['cek suhu'],
-        'nadi'          => ['cek nadi'],
-        'respirasi'     => ['cek respirasi'],
-        'bmi'           => ['cek bmi', 'cek antropometri'],
-        'catatan_gizi'  => ['konsultasi gizi'],
+        'gula_darah'   => ['cek gula darah'],
+        'kolesterol'   => ['cek kolesterol'],
+        'asam_urat'    => ['cek asam urat'],
+        'tensi'        => ['cek tekanan darah'],
+        'suhu'         => ['cek suhu'],
+        'nadi'         => ['cek nadi'],
+        'respirasi'    => ['cek respirasi'],
+        'bmi'          => ['cek bmi', 'cek antropometri'],
+        'catatan_gizi' => ['konsultasi gizi'],
     ];
 
-    $paketMapping = [
-        'paket sehat 1' => ['tensi', 'suhu', 'nadi', 'respirasi'],
-        'paket sehat 2' => ['tensi', 'suhu', 'nadi', 'respirasi'],
-        'paket sehat 3' => ['tensi', 'suhu', 'nadi', 'respirasi'],
-        'paket sehat 4' => ['gula_darah', 'kolesterol', 'asam_urat',
-                            'tensi', 'suhu', 'nadi', 'respirasi'],
-        'paket sehat 5' => ['tensi', 'suhu', 'nadi', 'respirasi'],
+    $allVitalServices = [
+        'paket sehat 1', 'paket sehat 2', 'paket sehat 3',
+        'paket sehat 4', 'paket sehat 5',
     ];
 
+    $fields = [];
     foreach ($itemNames as $nama) {
         $namaLower = strtolower(trim($nama));
-
-        foreach ($paketMapping as $paket => $paketFields) {
-            if (str_contains($namaLower, $paket)) {
-                $fields = array_merge($fields, $paketFields);
-                continue 2;
+        foreach ($allVitalServices as $vs) {
+            if (str_contains($namaLower, $vs)) {
+                return ['gula_darah','kolesterol','asam_urat',
+                        'tensi','suhu','nadi','respirasi'];
             }
         }
-
         foreach ($mapping as $field => $keywords) {
             foreach ($keywords as $kw) {
-                if ($namaLower === $kw) {
+                if ($namaLower === $kw || str_contains($namaLower, $kw)) {
                     $fields[] = $field;
                     break;
                 }
             }
         }
     }
-
     return array_unique($fields);
 }
 }

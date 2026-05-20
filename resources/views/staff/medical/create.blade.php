@@ -43,6 +43,41 @@
 </div>
 @endif
 
+
+
+{{-- Alert error kosong --}}
+@if(session('error'))
+<div class="alert border-0 shadow-sm mb-4 d-flex align-items-start gap-3"
+     style="border-radius:12px;background:#ffebee;border-left:4px solid #c62828 !important;">
+    <i class="bi bi-exclamation-triangle-fill mt-1"
+       style="color:#c62828;font-size:18px;flex-shrink:0;"></i>
+
+    <div>
+        <div class="fw-bold mb-1" style="color:#c62828;">
+            Tidak bisa menyimpan!
+        </div>
+
+        <div style="font-size:13px;color:#555;">
+            {{ session('error') }}
+        </div>
+
+        @if(session('error_kosong'))
+        <div class="mt-2 p-2 rounded"
+             style="background:#fff3f3;font-size:12px;color:#666;">
+            <i class="bi bi-lightbulb-fill me-1"
+               style="color:#F57C00;"></i>
+
+            <strong>Tips:</strong>
+            Jika hasil pemeriksaan memang nol,
+            masukkan angka <code>0</code> pada field tersebut.
+            Jangan biarkan semua field kosong.
+        </div>
+        @endif
+    </div>
+</div>
+@endif
+
+{{-- Pilih Pasien jika belum ada --}}
 {{-- Pilih Pasien jika belum ada --}}
 @if(!$patient)
 <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
@@ -84,6 +119,12 @@
     <div class="card-body p-4">
         <form action="{{ route('staff.medical-records.store') }}" method="POST">
             @csrf
+
+            @if(!empty($activeFields))
+<input type="hidden"
+       name="fields"
+       value="{{ implode(',', $activeFields) }}">
+@endif
 
             <input type="hidden" name="patient_id"
                    value="{{ $patient?->id }}" id="form-patient-id">
@@ -569,5 +610,111 @@ function hitungBMI() {
     label.textContent = kategori;
     label.style.color = warna;
 }
+
+// Validasi form sebelum submit
+document.querySelector('form').addEventListener('submit', function(e) {
+
+    const activeInputs = document.querySelectorAll(
+        '.p-3.rounded:not([style*="opacity:0"]) input:not([disabled]):not([readonly]),' +
+        '.p-3.rounded:not([style*="opacity:0"]) textarea:not([disabled])'
+    );
+
+    let adaYangDiisi = false;
+
+    activeInputs.forEach(input => {
+        if (input.value && input.value.trim() !== '') {
+            adaYangDiisi = true;
+        }
+    });
+
+    if (!adaYangDiisi && activeInputs.length > 0) {
+
+        e.preventDefault();
+
+        // Tampilkan peringatan
+        let alertBox = document.getElementById('client-validation-alert');
+
+        if (!alertBox) {
+
+            alertBox = document.createElement('div');
+
+            alertBox.id = 'client-validation-alert';
+
+            alertBox.style.cssText = `
+                position:fixed;
+                top:20px;
+                left:50%;
+                transform:translateX(-50%);
+                z-index:9999;
+                min-width:320px;
+                max-width:480px;
+                background:#ffebee;
+                border:1px solid #ef9a9a;
+                border-radius:12px;
+                padding:14px 18px;
+                box-shadow:0 8px 24px rgba(0,0,0,0.15);
+                display:flex;
+                align-items:flex-start;
+                gap:12px;
+            `;
+
+            alertBox.innerHTML = `
+                <i class="bi bi-exclamation-triangle-fill"
+                   style="color:#c62828;font-size:20px;flex-shrink:0;margin-top:2px;"></i>
+
+                <div>
+                    <div style="font-weight:700;color:#c62828;margin-bottom:4px;">
+                        Hasil pemeriksaan tidak boleh kosong!
+                    </div>
+
+                    <div style="font-size:13px;color:#555;">
+                        Isi minimal satu field yang tersedia.<br>
+                        Jika hasilnya nol, masukkan angka <strong>0</strong>.
+                    </div>
+                </div>
+
+                <button onclick="this.parentElement.remove()"
+                        style="background:none;
+                               border:none;
+                               color:#999;
+                               font-size:18px;
+                               cursor:pointer;
+                               margin-left:auto;
+                               padding:0;
+                               line-height:1;">
+                    ×
+                </button>
+            `;
+
+            document.body.appendChild(alertBox);
+        }
+
+        // Highlight field kosong
+        activeInputs.forEach(input => {
+
+            if (!input.value || input.value.trim() === '') {
+
+                input.style.borderColor = '#c62828';
+                input.style.background  = '#fff5f5';
+
+                setTimeout(() => {
+                    input.style.borderColor = '';
+                    input.style.background  = '';
+                }, 4000);
+            }
+        });
+
+        // Auto remove alert
+        setTimeout(() => {
+            if (alertBox) alertBox.remove();
+        }, 5000);
+
+        // Scroll ke atas
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+});
 </script>
 @endpush

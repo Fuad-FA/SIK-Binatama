@@ -19,7 +19,7 @@
 </div>
 
 {{-- Alert transaksi pending rekam medis --}}
-@if(isset($pendingTransactions) && $pendingTransactions->count() > 0)
+{{-- @if(isset($pendingTransactions) && $pendingTransactions->count() > 0)
 <div class="card border-0 shadow-sm mb-4"
      style="border-radius:12px;border-left:4px solid var(--orange) !important;">
     <div class="card-body p-3">
@@ -59,6 +59,61 @@
                             'patient_id'     => $pending->patient_id,
                             'transaction_id' => $pending->id,
                             'fields'         => $fields,
+                       ]) }}"
+               class="btn btn-warning btn-sm fw-semibold">
+                <i class="bi bi-clipboard2-pulse me-1"></i>Input Sekarang
+            </a>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif --}}
+
+@if(isset($pendingTransactions) && $pendingTransactions->count() > 0)
+<div class="card border-0 shadow-sm mb-4"
+     style="border-radius:12px;border-left:4px solid var(--orange) !important;">
+    <div class="card-body p-3">
+        <div class="fw-bold mb-2" style="color:var(--orange);font-size:14px;">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Ada {{ $pendingTransactions->count() }} transaksi yang belum diisi hasil pemeriksaannya!
+        </div>
+        @foreach($pendingTransactions as $pending)
+        @php
+            $itemNames    = $pending->items->pluck('nama_item')->toArray();
+            // $pendingFields = $this->getFieldsFromItems($itemNames);
+            // Tidak bisa panggil $this di view, jadi hitung langsung
+            $fieldsStr = implode(',', array_unique(array_filter([
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek gula darah')) ? 'gula_darah' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek kolesterol')) ? 'kolesterol' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek asam urat')) ? 'asam_urat' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek tekanan darah')) ? 'tensi' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek suhu')) ? 'suhu' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek nadi')) ? 'nadi' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek respirasi')) ? 'respirasi' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'cek bmi') || str_contains(strtolower($n), 'cek antropometri')) ? 'bmi' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'konsultasi gizi')) ? 'catatan_gizi' : null,
+                collect($itemNames)->contains(fn($n) => str_contains(strtolower($n), 'paket sehat')) ? 'gula_darah,kolesterol,asam_urat,tensi,suhu,nadi,respirasi' : null,
+            ])));
+        @endphp
+        <div class="d-flex align-items-center gap-3 p-2 rounded mb-2"
+             style="background:#fff8e1;">
+            <div class="flex-grow-1">
+                <div class="fw-semibold" style="font-size:13px;">
+                    {{ $pending->patient->nama }}
+                    <code style="font-size:11px;background:#ffe0b2;padding:1px 6px;
+                                 border-radius:3px;color:var(--orange);">
+                        {{ $pending->no_transaksi }}
+                    </code>
+                </div>
+                <div class="text-muted" style="font-size:11px;">
+                    {{ $pending->items->pluck('nama_item')->join(', ') }}
+                    · {{ $pending->created_at->diffForHumans() }}
+                </div>
+            </div>
+            <a href="{{ route('staff.medical-records.create', [
+                            'patient_id'     => $pending->patient_id,
+                            'transaction_id' => $pending->id,
+                            'fields'         => $fieldsStr,
                        ]) }}"
                class="btn btn-warning btn-sm fw-semibold">
                 <i class="bi bi-clipboard2-pulse me-1"></i>Input Sekarang

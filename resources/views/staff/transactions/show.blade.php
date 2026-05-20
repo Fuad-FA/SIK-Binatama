@@ -164,7 +164,7 @@
         }
     @endphp --}}
 
-    @php
+    {{-- @php
     $itemNamesShow = $transaction->items->pluck('nama_item')->toArray();
 
     // Whitelist EKSAK layanan yang memerlukan rekam medis
@@ -185,6 +185,66 @@
             }
         }
     }
+@endphp --}}
+
+@php
+    $itemNamesShow = $transaction->items->pluck('nama_item')->toArray();
+
+    $medicalServices = [
+        'cek gula darah', 'cek kolesterol', 'cek asam urat',
+        'cek tekanan darah', 'cek suhu', 'cek nadi', 'cek respirasi',
+        'cek bmi', 'cek antropometri', 'konsultasi gizi',
+        'paket sehat 1', 'paket sehat 2', 'paket sehat 3',
+        'paket sehat 4', 'paket sehat 5',
+    ];
+
+    $needsMedical = false;
+    foreach ($itemNamesShow as $n) {
+        $nl = strtolower(trim($n));
+        foreach ($medicalServices as $ms) {
+            if ($nl === $ms || str_contains($nl, $ms)) {
+                $needsMedical = true;
+                break 2;
+            }
+        }
+    }
+
+    // Hitung fields untuk tombol "Isi Pemeriksaan Dulu"
+    $fieldsShow = [];
+    $mappingShow = [
+        'gula_darah'   => ['cek gula darah'],
+        'kolesterol'   => ['cek kolesterol'],
+        'asam_urat'    => ['cek asam urat'],
+        'tensi'        => ['cek tekanan darah'],
+        'suhu'         => ['cek suhu'],
+        'nadi'         => ['cek nadi'],
+        'respirasi'    => ['cek respirasi'],
+        'bmi'          => ['cek bmi', 'cek antropometri'],
+        'catatan_gizi' => ['konsultasi gizi'],
+    ];
+    $allVitalsShow = [
+        'paket sehat 1', 'paket sehat 2', 'paket sehat 3',
+        'paket sehat 4', 'paket sehat 5',
+    ];
+    foreach ($itemNamesShow as $n) {
+        $nl = strtolower(trim($n));
+        foreach ($allVitalsShow as $vs) {
+            if (str_contains($nl, $vs)) {
+                $fieldsShow = ['gula_darah','kolesterol','asam_urat',
+                               'tensi','suhu','nadi','respirasi'];
+                break 2;
+            }
+        }
+        foreach ($mappingShow as $field => $kws) {
+            foreach ($kws as $kw) {
+                if ($nl === $kw || str_contains($nl, $kw)) {
+                    $fieldsShow[] = $field;
+                    break;
+                }
+            }
+        }
+    }
+    $fieldsShow = array_unique($fieldsShow);
 @endphp
 
     @if(!$needsMedical || $transaction->medical_record_id)
