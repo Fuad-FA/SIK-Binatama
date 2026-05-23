@@ -195,11 +195,11 @@ public function store(Request $request)
         ? explode(',', $request->fields)
         : [];
 
-        Log::info('FIELDS PARAM: ' . $request->fields);
+//         Log::info('FIELDS PARAM: ' . $request->fields);
 
-Log::info('ACTIVE FIELDS: ' . json_encode($activeFields));
+// Log::info('ACTIVE FIELDS: ' . json_encode($activeFields));
 
-Log::info('REQUEST DATA: ', $request->all());
+// Log::info('REQUEST DATA: ', $request->all());
 
     $fieldInputMap = [
         'gula_darah'   => ['gula_darah'],
@@ -229,65 +229,120 @@ Log::info('REQUEST DATA: ', $request->all());
     |--------------------------------------------------------------------------
     */
 
-    if (!empty($activeFields)) {
+    // if (!empty($activeFields)) {
 
-        $adaYangDiisi = false;
+    //     $adaYangDiisi = false;
 
-        foreach ($activeFields as $field) {
+    //     foreach ($activeFields as $field) {
 
-            $inputs = $fieldInputMap[$field] ?? [$field];
+    //         $inputs = $fieldInputMap[$field] ?? [$field];
 
-            foreach ($inputs as $input) {
+    //         foreach ($inputs as $input) {
 
-                if ($request->filled($input)) {
-                    $adaYangDiisi = true;
-                    break 2;
-                }
+    //             if ($request->filled($input)) {
+    //                 $adaYangDiisi = true;
+    //                 break 2;
+    //             }
+    //         }
+    //     }
+
+    //     if (!$adaYangDiisi) {
+
+    //         return back()
+    //             ->withInput()
+    //             ->with('error_kosong', true)
+    //             ->with(
+    //                 'error',
+    //                 'Hasil pemeriksaan tidak boleh kosong semua! Isi minimal satu field yang tersedia, atau masukkan 0 jika hasilnya nol.'
+    //             );
+    //     }
+
+
+    /*
+|--------------------------------------------------------------------------
+| VALIDASI: SEMUA FIELD AKTIF WAJIB DIISI
+|--------------------------------------------------------------------------
+*/
+
+if (!empty($activeFields)) {
+
+    $fieldKosong = [];
+
+    foreach ($activeFields as $field) {
+
+        $inputs = $fieldInputMap[$field] ?? [$field];
+
+        // Cek apakah semua input field ini terisi
+        $fieldIniKosong = false;
+
+        foreach ($inputs as $input) {
+
+            if (!$request->filled($input)) {
+                $fieldIniKosong = true;
             }
         }
 
-        if (!$adaYangDiisi) {
+        if ($fieldIniKosong) {
 
-            return back()
-                ->withInput()
-                ->with('error_kosong', true)
-                ->with(
-                    'error',
-                    'Hasil pemeriksaan tidak boleh kosong semua! Isi minimal satu field yang tersedia, atau masukkan 0 jika hasilnya nol.'
-                );
+            $labelMap = [
+                'gula_darah'   => 'Gula Darah',
+                'kolesterol'   => 'Kolesterol',
+                'asam_urat'    => 'Asam Urat',
+                'tensi'        => 'Tekanan Darah (Sistolik & Diastolik)',
+                'suhu'         => 'Suhu Tubuh',
+                'nadi'         => 'Nadi',
+                'respirasi'    => 'Respirasi',
+                'bmi'          => 'Berat Badan & Tinggi Badan',
+                'catatan_gizi' => 'Catatan Konsultasi Gizi',
+            ];
+
+            $fieldKosong[] = $labelMap[$field] ?? $field;
         }
+    }
 
+    if (!empty($fieldKosong)) {
+
+        return back()
+            ->withInput()
+            ->with('error_kosong', true)
+            ->with(
+                'error',
+                'Field berikut wajib diisi: ' .
+                implode(', ', $fieldKosong) .
+                '. Jika hasilnya nol, masukkan angka 0.'
+            );
+    }
         /*
         |--------------------------------------------------------------------------
         | VALIDASI TENSI
         |--------------------------------------------------------------------------
         */
 
-        if (in_array('tensi', $activeFields)) {
+        // if (in_array('tensi', $activeFields)) {
 
-            $adaSistolik  = $request->filled('tensi_sistolik');
-            $adaDiastolik = $request->filled('tensi_diastolik');
+        //     $adaSistolik  = $request->filled('tensi_sistolik');
+        //     $adaDiastolik = $request->filled('tensi_diastolik');
 
-            if ($adaSistolik && !$adaDiastolik) {
+        //     if ($adaSistolik && !$adaDiastolik) {
 
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'Tekanan darah diastolik harus diisi jika sistolik sudah diisi.'
-                    );
-            }
+        //         return back()
+        //             ->withInput()
+        //             ->with(
+        //                 'error',
+        //                 'Tekanan darah diastolik harus diisi jika sistolik sudah diisi.'
+        //             );
+        //     }
 
-            if (!$adaSistolik && $adaDiastolik) {
+        //     if (!$adaSistolik && $adaDiastolik) {
 
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'Tekanan darah sistolik harus diisi jika diastolik sudah diisi.'
-                    );
-            }
-        }
+        //         return back()
+        //             ->withInput()
+        //             ->with(
+        //                 'error',
+        //                 'Tekanan darah sistolik harus diisi jika diastolik sudah diisi.'
+        //             );
+        //     }
+        // }
 
         /*
         |--------------------------------------------------------------------------
@@ -295,31 +350,31 @@ Log::info('REQUEST DATA: ', $request->all());
         |--------------------------------------------------------------------------
         */
 
-        if (in_array('bmi', $activeFields)) {
+        // if (in_array('bmi', $activeFields)) {
 
-            $adaBerat  = $request->filled('berat_badan');
-            $adaTinggi = $request->filled('tinggi_badan');
+        //     $adaBerat  = $request->filled('berat_badan');
+        //     $adaTinggi = $request->filled('tinggi_badan');
 
-            if ($adaBerat && !$adaTinggi) {
+        //     if ($adaBerat && !$adaTinggi) {
 
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'Tinggi badan harus diisi jika berat badan sudah diisi.'
-                    );
-            }
+        //         return back()
+        //             ->withInput()
+        //             ->with(
+        //                 'error',
+        //                 'Tinggi badan harus diisi jika berat badan sudah diisi.'
+        //             );
+        //     }
 
-            if (!$adaBerat && $adaTinggi) {
+        //     if (!$adaBerat && $adaTinggi) {
 
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'Berat badan harus diisi jika tinggi badan sudah diisi.'
-                    );
-            }
-        }
+        //         return back()
+        //             ->withInput()
+        //             ->with(
+        //                 'error',
+        //                 'Berat badan harus diisi jika tinggi badan sudah diisi.'
+        //             );
+        //     }
+        // }
     }
 
     /*

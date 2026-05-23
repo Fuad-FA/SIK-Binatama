@@ -91,6 +91,62 @@
         .result-badge-normal   { background: #e8f5e9; color: #2E7D32; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
         .result-badge-abnormal { background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
 
+
+
+        .card-record{
+    background:#fff;
+    border-radius:12px;
+    margin:0 16px 16px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    overflow:hidden;
+}
+
+.record-header{
+    background:linear-gradient(135deg,#1B5E20,#2E7D32);
+    color:#fff;
+    padding:14px 16px;
+}
+
+.record-item{
+    padding:12px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #f3f3f3;
+}
+
+.record-item:last-child{
+    border-bottom:none;
+}
+
+.record-label{
+    font-size:13px;
+    color:#666;
+}
+
+.record-value{
+    font-weight:700;
+    font-size:13px;
+}
+
+.record-item .badge{
+    font-size:10px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+.record-item .text-end{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+}
+
+.record-item .record-value{
+    line-height:1.3;
+}
+
+
         .nav-bottom {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: #fff;
@@ -173,7 +229,7 @@
     </div>
 
     {{-- Hasil Pemeriksaan Terakhir --}}
-    @if($latestRecord)
+    {{-- @if($latestRecord)
     <div class="result-card">
         <div class="rc-header"
              style="background:#f1f8e9;">
@@ -293,7 +349,243 @@
             <div style="font-size:13px;">Belum ada riwayat pemeriksaan.</div>
         </div>
     </div>
+    @endif --}}
+
+
+    {{-- Hasil Pemeriksaan Terakhir --}}
+@if($latestRecord)
+<div class="card-record mb-3">
+    <div class="record-header d-flex justify-content-between align-items-center">
+        <div>
+            <div class="fw-bold" style="font-size:15px;">
+                {{ $latestRecord->tanggal_periksa->format('d M Y') }}
+            </div>
+            <div style="font-size:12px;opacity:0.8;">
+                Petugas: {{ $latestRecord->user?->name ?? '-' }}
+            </div>
+        </div>
+        <span class="badge"
+              style="background:rgba(255,255,255,0.2);font-size:11px;">
+            Pemeriksaan Terakhir
+        </span>
+    </div>
+
+    {{-- Gula Darah --}}
+    @if($latestRecord->gula_darah)
+    <div class="record-item">
+        <span class="record-label">Gula Darah</span>
+        <div class="text-end">
+            <span class="record-value">{{ number_format($latestRecord->gula_darah, 2) }} mg/dl</span>
+            <span class="badge ms-1 px-2 py-1"
+                  style="background:{{ $latestRecord->gula_darah < 200 ? '#e8f5e9' : '#ffebee' }};
+                         color:{{ $latestRecord->gula_darah < 200 ? '#2E7D32' : '#c62828' }};
+                         font-size:10px;">
+                {{ $latestRecord->gula_darah < 200 ? 'Normal' : 'Tinggi' }}
+            </span>
+        </div>
+    </div>
     @endif
+
+    {{-- Kolesterol --}}
+    @if($latestRecord->kolesterol)
+    @php $kolOk = $latestRecord->kolesterol >= 160 && $latestRecord->kolesterol <= 200; @endphp
+    <div class="record-item">
+        <span class="record-label">Kolesterol</span>
+        <div class="text-end">
+            <span class="record-value">{{ number_format($latestRecord->kolesterol, 2) }} mg/dl</span>
+            <span class="badge ms-1 px-2 py-1"
+                  style="background:{{ $kolOk ? '#e8f5e9' : '#ffebee' }};
+                         color:{{ $kolOk ? '#2E7D32' : '#c62828' }};
+                         font-size:10px;">
+                {{ $kolOk ? 'Normal' : 'Abnormal' }}
+            </span>
+        </div>
+    </div>
+    @endif
+
+    {{-- Asam Urat --}}
+    @if($latestRecord->asam_urat)
+    @php $auOk = $latestRecord->asam_urat >= 2.4 && $latestRecord->asam_urat <= 7; @endphp
+    <div class="record-item">
+        <span class="record-label">Asam Urat</span>
+        <div class="text-end">
+            <span class="record-value">{{ number_format($latestRecord->asam_urat, 2) }} mg/dl</span>
+            <span class="badge ms-1 px-2 py-1"
+                  style="background:{{ $auOk ? '#e8f5e9' : '#ffebee' }};
+                         color:{{ $auOk ? '#2E7D32' : '#c62828' }};font-size:10px;">
+                {{ $auOk ? 'Normal' : 'Abnormal' }}
+            </span>
+        </div>
+    </div>
+    @endif
+
+    {{-- Tekanan Darah --}}
+    @if($latestRecord->tensi_sistolik)
+    @php
+        $tensiOk = $latestRecord->tensi_sistolik <= 120 && $latestRecord->tensi_diastolik <= 80;
+        $tensiStatus = $tensiOk ? 'Normal'
+            : ($latestRecord->tensi_sistolik <= 139 ? 'Prehipertensi' : 'Hipertensi');
+        $tensiWarna = $tensiOk ? '#2E7D32'
+            : ($latestRecord->tensi_sistolik <= 139 ? '#F57C00' : '#c62828');
+        $tensiBg = $tensiOk ? '#e8f5e9'
+            : ($latestRecord->tensi_sistolik <= 139 ? '#fff8e1' : '#ffebee');
+    @endphp
+    <div class="record-item">
+        <span class="record-label">Tekanan Darah</span>
+        <div class="text-end">
+            <span class="record-value">
+                {{ $latestRecord->tensi_sistolik }}/{{ $latestRecord->tensi_diastolik }} mmHg
+            </span>
+            <span class="badge ms-1 px-2 py-1"
+                  style="background:{{ $tensiBg }};color:{{ $tensiWarna }};font-size:10px;">
+                {{ $tensiStatus }}
+            </span>
+        </div>
+    </div>
+    @endif
+
+    {{-- Suhu, Nadi, Respirasi --}}
+    @if($latestRecord->suhu || $latestRecord->nadi || $latestRecord->respirasi)
+    {{-- <div class="d-flex justify-content-between py-2"
+         style="border-bottom:1px solid #f0f0f0;"> --}}
+
+         <div class="d-flex justify-content-between py-2"style="border-bottom:1px solid #f0f0f0;">
+        @if($latestRecord->suhu)
+        <div class="text-center flex-grow-1">
+            <div style="font-size:10px;color:#aaa;">Suhu</div>
+            <div class="fw-bold" style="font-size:14px;">{{ $latestRecord->suhu }}°C</div>
+        </div>
+        @endif
+        @if($latestRecord->nadi)
+        <div class="text-center flex-grow-1"
+             style="border-left:1px solid #f0f0f0;border-right:1px solid #f0f0f0;">
+            <div style="font-size:10px;color:#aaa;">Nadi</div>
+            <div class="fw-bold" style="font-size:14px;">{{ $latestRecord->nadi }}/mnt</div>
+        </div>
+        @endif
+        @if($latestRecord->respirasi)
+        <div class="text-center flex-grow-1">
+            <div style="font-size:10px;color:#aaa;">Respirasi</div>
+            <div class="fw-bold" style="font-size:14px;">{{ $latestRecord->respirasi }}/mnt</div>
+        </div>
+        @endif
+    </div>
+    @endif
+
+    {{-- BMI --}}
+    @if($latestRecord->bmi)
+    <div class="record-item">
+        <span class="record-label">BMI</span>
+        <div class="text-end">
+            <span class="record-value" style="color:{{ $latestRecord->warnaBmi() }};">
+                {{ $latestRecord->bmi }} kg/m²
+            </span>
+            <span class="badge ms-1 px-2 py-1"
+                  style="background:{{ $latestRecord->warnaBmi() }};
+                         color:#fff;font-size:10px;">
+                {{ $latestRecord->kategoriBmi() }}
+            </span>
+        </div>
+    </div>
+    @endif
+
+    {{-- Berat & Tinggi --}}
+    @if($latestRecord->berat_badan || $latestRecord->tinggi_badan)
+    <div class="record-item">
+        <span class="record-label">Berat / Tinggi</span>
+        <span class="record-value">
+            {{ $latestRecord->berat_badan ?? '-' }} kg /
+            {{ $latestRecord->tinggi_badan ?? '-' }} cm
+        </span>
+    </div>
+    @endif
+
+    {{-- Catatan Konsultasi Gizi --}}
+    {{-- @if($latestRecord->catatan_gizi)
+    <div class="py-2" style="border-bottom:1px solid #f0f0f0;">
+        <div style="font-size:11px;color:#aaa;margin-bottom:4px;">
+            Catatan Konsultasi Gizi
+        </div>
+        <div class="p-2 rounded" style="background:#f3e5f5;font-size:13px;color:#333;">
+            {{ $latestRecord->catatan_gizi }}
+        </div>
+    </div>
+    @endif --}}
+
+
+    {{-- Catatan Konsultasi Gizi --}}
+@if($latestRecord->catatan_gizi)
+<div class="record-item d-block">
+
+    <div class="record-label mb-2">
+        Catatan Konsultasi Gizi
+    </div>
+
+    <div class="p-3 rounded-3"
+         style="background:#f3e5f5;font-size:13px;color:#333;line-height:1.5;">
+        {{ $latestRecord->catatan_gizi }}
+    </div>
+
+</div>
+@endif
+
+    {{-- Catatan Tambahan --}}
+    {{-- @if($latestRecord->catatan)
+    <div class="record-item">
+        <span class="record-label">Catatan</span>
+        <span class="record-value" style="font-size:12px;text-align:right;max-width:60%;">
+            {{ $latestRecord->catatan }}
+        </span>
+    </div>
+    @endif --}}
+
+    {{-- Catatan Tambahan --}}
+@if($latestRecord->catatan)
+<div class="record-item align-items-start">
+
+    <div class="record-label">
+        Catatan
+    </div>
+
+    <div class="record-value text-end"
+         style="font-size:12px;max-width:65%;line-height:1.5;">
+        {{ $latestRecord->catatan }}
+    </div>
+
+</div>
+@endif
+
+</div>
+
+{{-- <a href="{{ route('patient.records') }}"
+   class="btn w-100 py-2 fw-semibold mb-3"
+   style="background:#e8f5e9;color:#2E7D32;border-radius:10px;">
+    <i class="bi bi-clock-history me-2"></i>Lihat Semua Riwayat
+</a> --}}
+
+{{-- <a href="{{ route('patient.records') }}"
+       class="btn w-100 py-2 fw-semibold"
+       style="background:#e8f5e9;color:#2E7D32;border-radius:10px;">
+        <i class="bi bi-clock-history me-2"></i>
+        Lihat Semua Riwayat
+    </a> --}}
+
+
+<div class="px-3 mb-3">
+    <a href="{{ route('patient.records') }}"
+       class="btn w-100 py-2 fw-semibold"
+       style="background:#e8f5e9;color:#2E7D32;border-radius:10px;">
+        <i class="bi bi-clock-history me-2"></i>
+        Lihat Semua Riwayat
+    </a>
+</div>
+
+@else
+<div class="text-center py-4 text-muted">
+    <i class="bi bi-clipboard2 d-block fs-2 mb-2 opacity-25"></i>
+    <div style="font-size:13px;">Belum ada data pemeriksaan.</div>
+</div>
+@endif
 
 </div>
 

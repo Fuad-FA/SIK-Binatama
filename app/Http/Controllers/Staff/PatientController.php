@@ -242,16 +242,29 @@ return redirect()
 
 
 
-    public function show(Patient $patient)
-    {
-        // Staf hanya bisa lihat pasien miliknya
-        // if (auth()->user()->role !== 'admin' && $patient->created_by !== auth()->id()) {
-        //     abort(403, 'Anda tidak berhak mengakses data pasien ini.');
-        // }
+    // public function show(Patient $patient)
+    // {
+    //     // Staf hanya bisa lihat pasien miliknya
+    //     // if (auth()->user()->role !== 'admin' && $patient->created_by !== auth()->id()) {
+    //     //     abort(403, 'Anda tidak berhak mengakses data pasien ini.');
+    //     // }
 
-        $patient->load(['medicalRecords.user', 'transactions.items', 'creator']);
-        return view('staff.patients.show', compact('patient'));
-    }
+    //     $patient->load(['medicalRecords.user', 'transactions.items', 'creator']);
+    //     return view('staff.patients.show', compact('patient'));
+    // }
+
+    public function show(Patient $patient)
+{
+    $patient->load([
+        'medicalRecords' => function($q) {
+            $q->with('user')->orderByDesc('tanggal_periksa')->orderByDesc('created_at');
+        },
+        'transactions.items',
+        'creator'
+    ]);
+
+    return view('staff.patients.show', compact('patient'));
+}
 
     public function edit(Patient $patient)
     {

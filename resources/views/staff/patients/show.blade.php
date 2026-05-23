@@ -283,7 +283,8 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($patient->medicalRecords->sortByDesc('tanggal_periksa') as $rec)
+                {{-- @forelse($patient->medicalRecords->sortByDesc('tanggal_periksa') as $rec) --}}
+                @forelse($patient->medicalRecords as $rec)
                 <tr>
                     <td class="ps-4 fw-semibold" style="font-size:13px;">
                         {{ $rec->tanggal_periksa->format('d M Y') }}
