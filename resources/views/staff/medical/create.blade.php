@@ -425,6 +425,106 @@
 </div>
 @endif
 
+
+{{-- Antropometri --}}
+@if(in_array('antropometri', $activeFields))
+<div class="col-12 mt-3">
+    <div class="p-3 rounded"
+         style="background:#e8f5e9;border:1px solid #a5d6a7;">
+        <div class="fw-semibold mb-3" style="font-size:13px;">
+            <i class="bi bi-rulers me-1" style="color:var(--hijau);"></i>
+            Cek Antropometri
+            <span class="badge bg-success ms-1" style="font-size:9px;">Aktif</span>
+        </div>
+        <div class="row g-3">
+            {{-- Berat Badan --}}
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:600;">
+                    Berat Badan (BB)
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="bb"
+                           class="form-control"
+                           value="{{ old('bb') }}"
+                           placeholder="mis: 65"
+                           step="0.1" min="0">
+                    <span class="input-group-text">kg</span>
+                </div>
+            </div>
+
+            {{-- Tinggi/Panjang Badan --}}
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:600;">
+                    Tinggi / Panjang Badan
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="tb"
+                           class="form-control"
+                           value="{{ old('tb') }}"
+                           placeholder="mis: 165"
+                           step="0.1" min="0">
+                    <span class="input-group-text">cm</span>
+                </div>
+            </div>
+
+            {{-- LiLA --}}
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:600;">
+                    Lingkar Lengan Atas (LiLA)
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="lila"
+                           class="form-control"
+                           value="{{ old('lila') }}"
+                           placeholder="mis: 28"
+                           step="0.1" min="0">
+                    <span class="input-group-text">cm</span>
+                </div>
+                <div class="text-muted mt-1" style="font-size:10px;">
+                    Normal WUS: ≥23.5 cm
+                </div>
+            </div>
+
+            {{-- Lingkar Kepala --}}
+            <div class="col-md-6">
+                <label class="form-label" style="font-size:12px;font-weight:600;">
+                    Lingkar Kepala
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="lingkar_kepala"
+                           class="form-control"
+                           value="{{ old('lingkar_kepala') }}"
+                           placeholder="mis: 54"
+                           step="0.1" min="0">
+                    <span class="input-group-text">cm</span>
+                </div>
+                <div class="text-muted mt-1" style="font-size:10px;">
+                    Normal dewasa: 53-57 cm
+                </div>
+            </div>
+
+            {{-- Lingkar Perut --}}
+            <div class="col-md-6">
+                <label class="form-label" style="font-size:12px;font-weight:600;">
+                    Lingkar Perut
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="lingkar_perut"
+                           class="form-control"
+                           value="{{ old('lingkar_perut') }}"
+                           placeholder="mis: 80"
+                           step="0.1" min="0">
+                    <span class="input-group-text">cm</span>
+                </div>
+                <div class="text-muted mt-1" style="font-size:10px;">
+                    Normal Pria: &lt;90 cm · Normal Wanita: &lt;80 cm
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Konsultasi Gizi --}}
 @if(in_array('catatan_gizi', $activeFields))
 <div class="col-12 mt-3">

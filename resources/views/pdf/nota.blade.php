@@ -249,7 +249,47 @@
     <td class="p-status">{{ $rec->kategoriBmi() }}</td>
 </tr>
 @endif
+
 </table>
+@if($rec->bb || $rec->tb || $rec->lila || $rec->lingkar_kepala || $rec->lingkar_perut)
+<div class="periksa-item" style="border-bottom:1px dotted #ccc;padding:3px 4px;">
+    <div class="periksa-label">Antropometri</div>
+    <table style="width:100%;font-size:9px;margin-top:2px;">
+        @if($rec->bb)
+        <tr>
+            <td style="color:#666;width:50%;">Berat Badan</td>
+            <td style="text-align:right;font-weight:bold;">{{ $rec->bb }} kg</td>
+        </tr>
+        @endif
+        @if($rec->tb)
+        <tr>
+            <td style="color:#666;">Tinggi/Panjang Badan</td>
+            <td style="text-align:right;font-weight:bold;">{{ $rec->tb }} cm</td>
+        </tr>
+        @endif
+        @if($rec->lila)
+        <tr>
+            <td style="color:#666;">LiLA</td>
+            <td style="text-align:right;font-weight:bold;">{{ $rec->lila }} cm</td>
+        </tr>
+        @endif
+        @if($rec->lingkar_kepala)
+        <tr>
+            <td style="color:#666;">Lingkar Kepala</td>
+            <td style="text-align:right;font-weight:bold;">{{ $rec->lingkar_kepala }} cm</td>
+        </tr>
+        @endif
+        @if($rec->lingkar_perut)
+        <tr>
+            <td style="color:#666;">Lingkar Perut</td>
+            <td style="text-align:right;font-weight:bold;">{{ $rec->lingkar_perut }} cm</td>
+        </tr>
+        @endif
+    </table>
+</div>
+@endif
+
+
 
 @if($rec->suhu || $rec->nadi || $rec->respirasi)
 <table class="vital">

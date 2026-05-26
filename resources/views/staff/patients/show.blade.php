@@ -278,6 +278,7 @@
                     <th style="font-size:12px;color:#888;font-weight:600;">PETUGAS</th> --}}
                     <th style="font-size:12px;color:#888;font-weight:600;">TENSI</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">BMI</th>
+                    <th style="font-size:12px;color:#888;font-weight:600;">ANTROPOMETRI</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">CATATAN GIZI</th>
                     <th style="font-size:12px;color:#888;font-weight:600;">PETUGAS</th>
                 </tr>
@@ -373,6 +374,32 @@
         <span class="text-muted">-</span>
     @endif
 </td>
+
+{{-- Antropometri --}}
+<td>
+    @if($rec->bb || $rec->tb || $rec->lila || $rec->lingkar_kepala || $rec->lingkar_perut)
+    <div style="font-size:11px;line-height:1.8;">
+        @if($rec->bb)
+            <span class="text-muted">BB:</span> <strong>{{ $rec->bb }} kg</strong><br>
+        @endif
+        @if($rec->tb)
+            <span class="text-muted">TB:</span> <strong>{{ $rec->tb }} cm</strong><br>
+        @endif
+        @if($rec->lila)
+            <span class="text-muted">LiLA:</span> <strong>{{ $rec->lila }} cm</strong><br>
+        @endif
+        @if($rec->lingkar_kepala)
+            <span class="text-muted">LK:</span> <strong>{{ $rec->lingkar_kepala }} cm</strong><br>
+        @endif
+        @if($rec->lingkar_perut)
+            <span class="text-muted">LP:</span> <strong>{{ $rec->lingkar_perut }} cm</strong>
+        @endif
+    </div>
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
+
 
 {{-- Catatan Gizi --}}
 <td>

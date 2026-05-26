@@ -255,6 +255,96 @@
 </div>
 @endif
 
+
+{{-- @if($rec->bb || $rec->tb || $rec->lila || $rec->lingkar_kepala || $rec->lingkar_perut)
+<div class="py-2 border-bottom">
+    <div class="text-muted mb-1" style="font-size:11px;">Antropometri</div>
+    <div class="row g-1" style="font-size:12px;">
+        @if($rec->bb)
+        <div class="col-6">
+            <span class="text-muted">Berat Badan:</span>
+            <strong>{{ $rec->bb }} kg</strong>
+        </div>
+        @endif
+        @if($rec->tb)
+        <div class="col-6">
+            <span class="text-muted">Tinggi Badan:</span>
+            <strong>{{ $rec->tb }} cm</strong>
+        </div>
+        @endif
+        @if($rec->lila)
+        <div class="col-6">
+            <span class="text-muted">LiLA:</span>
+            <strong>{{ $rec->lila }} cm</strong>
+        </div>
+        @endif
+        @if($rec->lingkar_kepala)
+        <div class="col-6">
+            <span class="text-muted">Lingkar Kepala:</span>
+            <strong>{{ $rec->lingkar_kepala }} cm</strong>
+        </div>
+        @endif
+        @if($rec->lingkar_perut)
+        <div class="col-6">
+            <span class="text-muted">Lingkar Perut:</span>
+            <strong>{{ $rec->lingkar_perut }} cm</strong>
+        </div>
+        @endif
+    </div>
+</div>
+@endif --}}
+
+
+@if($rec->bb || $rec->tb || $rec->lila || $rec->lingkar_kepala || $rec->lingkar_perut)
+
+<div class="result-row d-block">
+
+    <div style="color:#666;font-weight:600;margin-bottom:10px;">
+        Antropometri
+    </div>
+
+    <div class="row g-2">
+
+        @if($rec->bb)
+        <div class="col-6">
+            <div class="small text-muted">Berat Badan</div>
+            <div class="fw-bold">{{ $rec->bb }} kg</div>
+        </div>
+        @endif
+
+        @if($rec->tb)
+        <div class="col-6">
+            <div class="small text-muted">Tinggi Badan</div>
+            <div class="fw-bold">{{ $rec->tb }} cm</div>
+        </div>
+        @endif
+
+        @if($rec->lila)
+        <div class="col-6">
+            <div class="small text-muted">LiLA</div>
+            <div class="fw-bold">{{ $rec->lila }} cm</div>
+        </div>
+        @endif
+
+        @if($rec->lingkar_kepala)
+        <div class="col-6">
+            <div class="small text-muted">Lingkar Kepala</div>
+            <div class="fw-bold">{{ $rec->lingkar_kepala }} cm</div>
+        </div>
+        @endif
+
+        @if($rec->lingkar_perut)
+        <div class="col-6">
+            <div class="small text-muted">Lingkar Perut</div>
+            <div class="fw-bold">{{ $rec->lingkar_perut }} cm</div>
+        </div>
+        @endif
+
+    </div>
+
+</div>
+@endif
+
 @if($rec->catatan_gizi)
 <div class="result-row" style="display:block;">
     <div style="color:#666;margin-bottom:6px;">

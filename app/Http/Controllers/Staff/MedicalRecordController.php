@@ -181,6 +181,13 @@ public function store(Request $request)
         'berat_badan'     => 'nullable|numeric|min:1|max:500',
         'tinggi_badan'    => 'nullable|numeric|min:1|max:300',
 
+        // Tambahkan di $request->validate():
+'bb'              => 'nullable|numeric|min:0|max:500',
+'tb'              => 'nullable|numeric|min:0|max:300',
+'lila'            => 'nullable|numeric|min:0|max:100',
+'lingkar_kepala'  => 'nullable|numeric|min:0|max:100',
+'lingkar_perut'   => 'nullable|numeric|min:0|max:300',
+
         'catatan_gizi'    => 'nullable|string|max:2000',
         'catatan'         => 'nullable|string|max:500',
     ]);
@@ -219,6 +226,8 @@ public function store(Request $request)
             'berat_badan',
             'tinggi_badan'
         ],
+
+        'antropometri' => ['bb', 'tb', 'lila', 'lingkar_kepala', 'lingkar_perut'],
 
         'catatan_gizi' => ['catatan_gizi'],
     ];
@@ -425,6 +434,14 @@ if (!empty($activeFields)) {
         'berat_badan'     => $request->berat_badan,
         'tinggi_badan'    => $request->tinggi_badan,
         'bmi'             => $bmi,
+
+// Update MedicalRecord::create() — tambahkan:
+'bb'             => $request->bb,
+'tb'             => $request->tb,
+'lila'           => $request->lila,
+'lingkar_kepala' => $request->lingkar_kepala,
+'lingkar_perut'  => $request->lingkar_perut,
+
 
         'catatan_gizi'    => $request->catatan_gizi,
         'catatan'         => $request->catatan,

@@ -489,6 +489,115 @@
     </div>
     @endif
 
+    
+{{-- @if(
+    $latestRecord &&
+    (
+        $latestRecord->bb ||
+        $latestRecord->tb ||
+        $latestRecord->lila ||
+        $latestRecord->lingkar_kepala ||
+        $latestRecord->lingkar_perut
+    )
+)
+<div class="py-2 border-bottom">
+    <div class="text-muted mb-1" style="font-size:11px;">Antropometri</div>
+    <div class="row g-1" style="font-size:12px;">
+        @if($latestRecord->bb)
+        <div class="col-6">
+            <span class="text-muted">Berat Badan:</span>
+            <strong>{{ $latestRecord->bb }} kg</strong>
+        </div>
+        @endif
+        @if($latestRecord->tb)
+        <div class="col-6">
+            <span class="text-muted">Tinggi Badan:</span>
+            <strong>{{ $latestRecord->tb }} cm</strong>
+        </div>
+        @endif
+        @if($latestRecord->lila)
+        <div class="col-6">
+            <span class="text-muted">LiLA:</span>
+            <strong>{{ $latestRecord->lila }} cm</strong>
+        </div>
+        @endif
+        @if($latestRecord->lingkar_kepala)
+        <div class="col-6">
+            <span class="text-muted">Lingkar Kepala:</span>
+            <strong>{{ $latestRecord->lingkar_kepala }} cm</strong>
+        </div>
+        @endif
+        @if($latestRecord->lingkar_perut)
+        <div class="col-6">
+            <span class="text-muted">Lingkar Perut:</span>
+            <strong>{{ $latestRecord->lingkar_perut }} cm</strong>
+        </div>
+        @endif
+    </div>
+</div>
+@endif --}}
+
+
+@if(
+    $latestRecord &&
+    (
+        $latestRecord->bb ||
+        $latestRecord->tb ||
+        $latestRecord->lila ||
+        $latestRecord->lingkar_kepala ||
+        $latestRecord->lingkar_perut
+    )
+)
+
+<div class="record-item d-block">
+
+    <div class="record-label mb-2 fw-semibold">
+        Antropometri
+    </div>
+
+    <div class="row g-2">
+
+        @if($latestRecord->bb)
+        <div class="col-6">
+            <div class="small text-muted">Berat Badan</div>
+            <div class="fw-bold">{{ $latestRecord->bb }} kg</div>
+        </div>
+        @endif
+
+        @if($latestRecord->tb)
+        <div class="col-6">
+            <div class="small text-muted">Tinggi Badan</div>
+            <div class="fw-bold">{{ $latestRecord->tb }} cm</div>
+        </div>
+        @endif
+
+        @if($latestRecord->lila)
+        <div class="col-6">
+            <div class="small text-muted">LiLA</div>
+            <div class="fw-bold">{{ $latestRecord->lila }} cm</div>
+        </div>
+        @endif
+
+        @if($latestRecord->lingkar_kepala)
+        <div class="col-6">
+            <div class="small text-muted">Lingkar Kepala</div>
+            <div class="fw-bold">{{ $latestRecord->lingkar_kepala }} cm</div>
+        </div>
+        @endif
+
+        @if($latestRecord->lingkar_perut)
+        <div class="col-6">
+            <div class="small text-muted">Lingkar Perut</div>
+            <div class="fw-bold">{{ $latestRecord->lingkar_perut }} cm</div>
+        </div>
+        @endif
+
+    </div>
+
+</div>
+@endif
+
+
     {{-- Berat & Tinggi --}}
     @if($latestRecord->berat_badan || $latestRecord->tinggi_badan)
     <div class="record-item">

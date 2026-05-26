@@ -44,6 +44,9 @@ protected $fillable = [
     'tinggi_badan',
     'bmi',
 
+
+    'bb', 'tb', 'lila', 'lingkar_kepala', 'lingkar_perut',
+
     'catatan_gizi',
     'catatan',
 ];

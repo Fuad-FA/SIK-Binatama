@@ -504,7 +504,8 @@ private function getFieldsFromItems(array $itemNames): array
         'suhu'          => ['cek suhu'],
         'nadi'          => ['cek nadi'],
         'respirasi'     => ['cek respirasi'],
-        'bmi'           => ['cek bmi', 'cek antropometri'],
+        'bmi'           => ['cek bmi'],
+        'antropometri'  => ['cek antropometri'],  // pisahkan dari bmi
         'catatan_gizi'  => ['konsultasi gizi'],
     ];
 
